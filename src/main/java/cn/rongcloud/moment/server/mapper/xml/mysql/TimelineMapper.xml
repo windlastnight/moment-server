@@ -26,4 +26,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         DELETE FROM T_TIMELINE WHERE FEED_ID = #{feedId}
     </delete>
 
+    <select id="getTimelineByFeedId" resultMap="timelineResult">
+        <include refid="selectTimelineVo"/>
+        WHERE FEED_ID = #{feedId}
+    </select>
+
 </mapper>

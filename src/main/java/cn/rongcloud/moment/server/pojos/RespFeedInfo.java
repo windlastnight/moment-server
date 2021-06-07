@@ -4,9 +4,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
-public class RespFeedPublish {
+public class RespFeedInfo {
 
     @JsonProperty("feed_id")
     private String feedId;
@@ -28,4 +29,11 @@ public class RespFeedPublish {
 
     @JsonProperty("update_dt")
     private Date updateDt;
+
+    @JsonProperty("comments")
+    private List<RespCommentInfo> comments;
+
+    @JsonProperty("likes")
+    private List<RespLikeInfo> likes;
+
 }

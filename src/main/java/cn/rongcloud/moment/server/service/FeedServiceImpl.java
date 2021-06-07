@@ -14,7 +14,7 @@ import cn.rongcloud.moment.server.model.Timeline;
 import cn.rongcloud.moment.server.pojos.ReqFeedPublish;
 import cn.rongcloud.moment.server.common.rce.RceHelper;
 import cn.rongcloud.moment.server.common.rce.RceQueryResult;
-import cn.rongcloud.moment.server.pojos.RespFeedPublish;
+import cn.rongcloud.moment.server.pojos.RespFeedInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -66,14 +66,7 @@ public class FeedServiceImpl implements FeedService {
         redisOptService.setAdd(RedisKey.getMomentPublishNotifyUsersKey(), staffIds);
 
         //返回数据封装
-        RespFeedPublish resp = new RespFeedPublish();
-        resp.setFeedId(feed.getFeedId());
-        resp.setUserId(feed.getUserId());
-        resp.setFeedType(feed.getFeedType());
-        resp.setFeedContent(feed.getFeedContent());
-        resp.setFeedStatus(feed.getFeedStatus());
-        resp.setCreateDt(feed.getCreateDt());
-        resp.setUpdateDt(feed.getUpdateDt());
+        RespFeedInfo resp = bulid(feed);
 
         return RestResult.success(resp);
     }
@@ -94,6 +87,52 @@ public class FeedServiceImpl implements FeedService {
         feedMapper.deleteFeed(feedId);
         timelineMapper.deleteTimelineByFeedId(feedId);
         return RestResult.success();
+    }
+
+    @Override
+    public RestResult getFeedInfo(String userId, String feedId) {
+        //检查feed是否存在
+        Feed feed = feedMapper.getFeedById(feedId);
+        if (feed == null) {
+            return RestResult.generic(RestResultCode.ERR_FEED_NOT_EXISTED);
+        }
+        //TODO 校验用户是否有权限查看 Feed
+        //TODO 获取前 50 条点赞
+        //TODO 获取前 50 条评论
+        RespFeedInfo resp = bulid(feed);
+        return RestResult.success(resp);
+    }
+
+    @Override
+    public RestResult batchGetFeedInfo(String userId, List<String> feedIds) {
+
+        List<RespFeedInfo> result = new ArrayList<>();
+
+        List<Feed> feeds = feedMapper.getFeedsByIds(feedIds);
+        if (feeds != null && !feeds.isEmpty()) {
+            for (Feed feed: feeds) {
+                RespFeedInfo resp = bulid(feed);
+                result.add(resp);
+            }
+        }
+
+        //TODO 校验用户是否有权限查看 Feed
+        //TODO 获取前 50 条点赞
+        //TODO 获取前 50 条评论
+
+        return RestResult.success(result);
+    }
+
+    private RespFeedInfo bulid(Feed feed){
+        RespFeedInfo resp = new RespFeedInfo();
+        resp.setFeedId(feed.getFeedId());
+        resp.setUserId(feed.getUserId());
+        resp.setFeedType(feed.getFeedType());
+        resp.setFeedContent(feed.getFeedContent());
+        resp.setFeedStatus(feed.getFeedStatus());
+        resp.setCreateDt(feed.getCreateDt());
+        resp.setUpdateDt(feed.getUpdateDt());
+        return resp;
     }
 
 

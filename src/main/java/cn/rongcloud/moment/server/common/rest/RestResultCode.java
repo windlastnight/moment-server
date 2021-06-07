@@ -15,6 +15,7 @@ public enum RestResultCode {
     ERR_LOGIN_AUTH_FAILED(10006, "login auth failed"),
 
     ERR_FEED_PUBLISH_ORG_ID_ERROR(20000, "The org not existed or you don't have permission"),
+    ERR_FEED_NOT_EXISTED(20001, "The feed does not existed"),
     ;
 
     private int code;

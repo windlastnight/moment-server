@@ -12,4 +12,6 @@ public interface TimelineMapper {
     void batchInsertTimeline(@Param("timelines") List<Timeline> timelines);
 
     void deleteTimelineByFeedId(@Param("feedId") String feedId);
+
+    Timeline getTimelineByFeedId(@Param("feedId") String feedId);
 }

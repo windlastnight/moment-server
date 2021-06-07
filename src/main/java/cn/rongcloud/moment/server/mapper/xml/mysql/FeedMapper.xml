@@ -52,4 +52,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         DELETE FROM T_FEED WHERE FEED_ID = #{feedId}
     </delete>
 
+    <select id="getFeedsByIds" resultMap="feedResult">
+        <include refid="selectTFeedVo"/>
+        WHERE FEED_ID IN
+        <foreach item="feedId" collection="feedIds" open="(" separator="," close=")">
+            #{feedId}
+        </foreach>
+    </select>
+
 </mapper>
