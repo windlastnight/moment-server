@@ -10,7 +10,6 @@ public class Feed {
     private String userId;
     private Integer feedType;
     private String feedContent;
-    private String feedPoi;
     private Integer feedStatus;
     private Date createDt;
     private Date updateDt;

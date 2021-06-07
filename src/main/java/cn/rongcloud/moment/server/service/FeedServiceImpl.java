@@ -14,6 +14,7 @@ import cn.rongcloud.moment.server.model.Timeline;
 import cn.rongcloud.moment.server.pojos.ReqFeedPublish;
 import cn.rongcloud.moment.server.common.rce.RceHelper;
 import cn.rongcloud.moment.server.common.rce.RceQueryResult;
+import cn.rongcloud.moment.server.pojos.RespFeedPublish;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -54,7 +55,8 @@ public class FeedServiceImpl implements FeedService {
         }
 
         //动态存储
-        saveFeed(userId, data);
+        Feed feed = new Feed();
+        saveFeed(userId, data, feed);
 
         //将发布者排除，动态发布不通知发布者
         List<String> staffIds = result.getResult();
@@ -63,7 +65,17 @@ public class FeedServiceImpl implements FeedService {
         //将 feed 存储至队列,定时通知
         redisOptService.setAdd(RedisKey.getMomentPublishNotifyUsersKey(), staffIds);
 
-        return RestResult.success();
+        //返回数据封装
+        RespFeedPublish resp = new RespFeedPublish();
+        resp.setFeedId(feed.getFeedId());
+        resp.setUserId(feed.getUserId());
+        resp.setFeedType(feed.getFeedType());
+        resp.setFeedContent(feed.getFeedContent());
+        resp.setFeedStatus(feed.getFeedStatus());
+        resp.setCreateDt(feed.getCreateDt());
+        resp.setUpdateDt(feed.getUpdateDt());
+
+        return RestResult.success(resp);
     }
 
     @Override
@@ -85,9 +97,8 @@ public class FeedServiceImpl implements FeedService {
     }
 
 
-    private void saveFeed(String userId, ReqFeedPublish data) {
+    private void saveFeed(String userId, ReqFeedPublish data, Feed feed) {
 
-        Feed feed = new Feed();
         feed.setFeedId(IdentifierUtils.uuid24());
         feed.setUserId(userId);
         feed.setFeedType(data.getType());
