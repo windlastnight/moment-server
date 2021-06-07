@@ -22,4 +22,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </foreach >
     </insert>
 
+    <delete id="deleteTimelineByFeedId">
+        DELETE FROM T_TIMELINE WHERE FEED_ID = #{feedId}
+    </delete>
+
 </mapper>

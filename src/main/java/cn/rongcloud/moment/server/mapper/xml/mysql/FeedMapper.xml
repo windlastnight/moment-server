@@ -43,4 +43,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </trim>
     </insert>
 
+    <select id="getFeedById" resultMap="feedResult">
+        <include refid="selectTFeedVo"/>
+        WHERE FEED_ID = #{feedId}
+    </select>
+
+    <delete id="deleteFeed">
+        DELETE FROM T_FEED WHERE FEED_ID = #{feedId}
+    </delete>
+
 </mapper>

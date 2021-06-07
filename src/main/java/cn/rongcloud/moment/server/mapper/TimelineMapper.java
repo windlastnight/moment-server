@@ -10,4 +10,6 @@ import java.util.List;
 public interface TimelineMapper {
 
     void batchInsertTimeline(@Param("timelines") List<Timeline> timelines);
+
+    void deleteTimelineByFeedId(@Param("feedId") String feedId);
 }

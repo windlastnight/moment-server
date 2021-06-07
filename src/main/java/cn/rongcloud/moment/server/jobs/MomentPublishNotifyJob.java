@@ -2,7 +2,6 @@ package cn.rongcloud.moment.server.jobs;
 
 import cn.rongcloud.moment.server.common.im.IMHelper;
 import cn.rongcloud.moment.server.common.redis.RedisKey;
-import cn.rongcloud.moment.server.common.utils.GsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -12,9 +11,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 
 @Component

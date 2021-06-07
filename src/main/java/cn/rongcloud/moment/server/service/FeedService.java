@@ -8,4 +8,6 @@ import cn.rongcloud.moment.server.pojos.ReqFeedPublish;
  */
 public interface FeedService {
     RestResult publish(String userId, ReqFeedPublish data);
+
+    RestResult delete(String userId, String feedId);
 }

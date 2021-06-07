@@ -66,6 +66,7 @@ ds:
 
 moment:
   publish_notify_corn: 0 */1 * * * ?
+  system_manager_id: xxxxxxxx #系统管理员Id
 
 swagger2:
   enable: true

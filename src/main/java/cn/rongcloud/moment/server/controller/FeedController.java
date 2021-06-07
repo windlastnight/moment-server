@@ -28,4 +28,10 @@ public class FeedController {
         log.info("publish feed, operator:{}, data:{}", authUser.getUserId(), GsonUtil.toJson(data));
         return feedService.publish(authUser.getUserId(), data);
     }
+
+    @DeleteMapping("/{feedId}")
+    public RestResult delete(@RequestAttribute(value = JwtFilter.JWT_AUTH_DATA) JwtUser authUser, @PathVariable String feedId) {
+        log.info("delete feed, operator:{}, data:{}", authUser.getUserId(), feedId);
+        return feedService.delete(authUser.getUserId(), feedId);
+    }
 }

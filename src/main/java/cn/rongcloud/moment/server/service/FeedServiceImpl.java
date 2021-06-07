@@ -5,7 +5,6 @@ import cn.rongcloud.moment.server.common.redis.RedisOptService;
 import cn.rongcloud.moment.server.common.rest.RestResult;
 import cn.rongcloud.moment.server.common.rest.RestResultCode;
 import cn.rongcloud.moment.server.common.utils.DateTimeUtils;
-import cn.rongcloud.moment.server.common.utils.GsonUtil;
 import cn.rongcloud.moment.server.common.utils.IdentifierUtils;
 import cn.rongcloud.moment.server.enums.FeedStatus;
 import cn.rongcloud.moment.server.mapper.FeedMapper;
@@ -17,6 +16,7 @@ import cn.rongcloud.moment.server.common.rce.RceHelper;
 import cn.rongcloud.moment.server.common.rce.RceQueryResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Date;
@@ -41,6 +41,9 @@ public class FeedServiceImpl implements FeedService {
     @Autowired
     RedisOptService redisOptService;
 
+    @Value("${moment.system_manager_id}")
+    private String systemManagerId;
+
 
     @Override
     public RestResult publish(String userId, ReqFeedPublish data) {
@@ -62,6 +65,25 @@ public class FeedServiceImpl implements FeedService {
 
         return RestResult.success();
     }
+
+    @Override
+    public RestResult delete(String userId, String feedId) {
+        //检查用户是否有权限删除
+        if (!userId.equals(systemManagerId)) {
+            Feed feed = feedMapper.getFeedById(feedId);
+            if (feed == null) {
+                return RestResult.success();
+            }
+            if (!feed.getUserId().equals(userId)) {
+                return RestResult.generic(RestResultCode.ERR_ACCESS_DENIED);
+            }
+        }
+        //操作数据库删除
+        feedMapper.deleteFeed(feedId);
+        timelineMapper.deleteTimelineByFeedId(feedId);
+        return RestResult.success();
+    }
+
 
     private void saveFeed(String userId, ReqFeedPublish data) {
 
