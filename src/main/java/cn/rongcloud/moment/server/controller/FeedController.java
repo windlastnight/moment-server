@@ -1,0 +1,31 @@
+package cn.rongcloud.moment.server.controller;
+
+import cn.rongcloud.moment.server.common.jwt.JwtUser;
+import cn.rongcloud.moment.server.common.jwt.filter.JwtFilter;
+import cn.rongcloud.moment.server.common.rest.RestResult;
+import cn.rongcloud.moment.server.common.utils.GsonUtil;
+import cn.rongcloud.moment.server.pojos.ReqFeedPublish;
+import cn.rongcloud.moment.server.service.FeedService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+
+/**
+ * Created by sunyinglong on 2020/7/30
+ */
+@RestController
+@RequestMapping("/feed")
+@Slf4j
+public class FeedController {
+
+    @Autowired
+    private FeedService feedService;
+
+    @PostMapping
+    public RestResult publish(@RequestAttribute(value = JwtFilter.JWT_AUTH_DATA) JwtUser authUser, @Valid @RequestBody ReqFeedPublish data) {
+        log.info("publish feed, operator:{}, data:{}", authUser.getUserId(), GsonUtil.toJson(data));
+        return feedService.publish(authUser.getUserId(), data);
+    }
+}

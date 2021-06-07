@@ -7,6 +7,6 @@ public class CustomerConstant {
 
     private CustomerConstant() {}
 
-    public static final String SERVICENAME = "rcmt";
-    public static final String SYSTEM_USER_ID = "DLMrJ9prNw2vcl0MJavRClK"; //系统用户ID
+    public static final String SERVICE_NAME = "moment";
+    public static final String SYSTEM_ID = "GW52msQU5bsQnza2fd0kpkH";
 }

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.rongcloud.moment.server.mapper.TimelineMapper">
+
+    <resultMap type="cn.rongcloud.moment.server.model.Timeline" id="timelineResult">
+        <result property="feedId" column="FEED_ID"/>
+        <result property="orgId" column="ORG_ID"/>
+        <result property="createDt" column="CREATE_DT"/>
+    </resultMap>
+
+    <sql id="selectTimelineVo">
+        SELECT FEED_ID, ORG_ID, CREATE_DT FROM T_TIMELINE
+    </sql>
+
+    <insert id="batchInsertTimeline">
+        INSERT INTO T_TIMELINE (FEED_ID, ORG_ID, CREATE_DT)
+        VALUES
+        <foreach collection ="timelines" item="timeline" separator =",">
+            (#{timeline.feedId}, #{timeline.orgId}, #{timeline.createDt})
+        </foreach >
+    </insert>
+
+</mapper>
