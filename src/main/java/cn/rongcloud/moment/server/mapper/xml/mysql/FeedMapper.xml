@@ -45,7 +45,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <select id="getFeedById" resultMap="feedResult">
         <include refid="selectTFeedVo"/>
-        WHERE FEED_ID = #{feedId}
+        WHERE FEED_ID = #{feedId} LIMIT 1
     </select>
 
     <delete id="deleteFeed">

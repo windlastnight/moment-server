@@ -31,4 +31,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         WHERE FEED_ID = #{feedId}
     </select>
 
+    <select id="getTimeline" resultType="java.lang.String">
+        SELECT FEED_ID FROM T_TIMELINE
+        WHERE ORG_ID IN
+        <foreach item="orgId" collection="orgIds" open="(" separator="," close=")">
+            #{orgId}
+        </foreach>
+        AND CREATE_DT > #{createDt} LIMIT #{size}
+    </select>
+
+
 </mapper>
