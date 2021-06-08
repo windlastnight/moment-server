@@ -22,4 +22,8 @@ public class UserHolder {
         return userHolder.get().getUserId();
     }
 
+    public static void clear(){
+        userHolder.remove();
+    }
+
 }

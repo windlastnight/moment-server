@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8081
   servlet:
     context-path: /api
 spring:
@@ -15,24 +15,18 @@ spring:
     database: 0
     host: 127.0.0.1
     port: 6379
-    password: 123456
+    password:
 
 ## JWT 鉴权配置
 jwt:
-  secret: "ay9pL#$SealMic"
-  ttlInMilliSec: -1
+  secret: "ay9pL#$MeetingServer"
+  ttlInMilliSec: 86400000
 
 ## 融云 IM 配置
 im:
   appKey: xxx
   secret: xxxx
   host: http://api-cn.ronghub.com
-
-## 融云 RCE 配置
-rce:
-  systemUid: xxx
-  secret: xxx
-  host: http://127.0.0.1/api
 
 ## 日志配置
 logging:
@@ -50,11 +44,40 @@ logging:
 # 数据库相关配置
 db:
   name: mysql
+# Mysql
 jdbc:
   url: jdbc:mysql://localhost:3306/momentdb?useUnicode=true
   username: root
   password: 123456
   driver: com.mysql.jdbc.Driver
+
+# DM
+#jdbc:
+#  url: jdbc:dm://localhost:3306/meetingdb?useUnicode=true
+#  username: root
+#  password: 123456
+#  driver: dm.jdbc.driver.DmDriver
+
+## Kingbase
+#jdbc:
+#  url: jdbc:kingbase8://127.0.0.1:5888/meetingdb
+#  username: meetingdb
+#  password: root123456
+#  driver: com.kingbase8.Driver
+
+## Shentong
+#jdbc:
+#  url: jdbc:oscar://127.0.0.1:2003/osrdb
+#  username: meetingdb
+#  password: root123456
+#  driver: com.oscar.Driver
+
+## nantong
+#jdbc:
+#  url: jdbc:gbase://127.0.0.1:5258/sealmeeting
+#  username: sysdba
+#  password: GBase8sV8316
+#  driver: com.gbase.jdbc.Driver
 
 ds:
   initialSize: 5
@@ -64,7 +87,17 @@ ds:
   timeBetweenEvictionRunsMillis: 60000
   minEvictableIdleTimeMillis: 300000
 
+
+##moment工程内部配置
+
 moment:
+  pass:
+    anonymousUrls: /**/*/moment/auth
+
+  rce:
+    api: http://127.0.0.1:8080/rce/api
+
+
   publish_notify_corn: 0 */1 * * * ?
   system_manager_id: xxxxxxxx #系统管理员Id
 

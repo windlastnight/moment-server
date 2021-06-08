@@ -1,16 +1,20 @@
 package cn.rongcloud.moment.server.common.jwt.filter;
 
-import cn.rongcloud.moment.server.common.jwt.JwtTokenHelper;
-import cn.rongcloud.moment.server.common.jwt.JwtUser;
+import cn.rongcloud.moment.server.common.config.PassUrls;
 import cn.rongcloud.moment.server.common.jwt.enums.UserAgentTypeEnum;
-import cn.rongcloud.moment.server.service.UserService;
+import cn.rongcloud.moment.server.common.rest.RestException;
+import cn.rongcloud.moment.server.common.rest.RestResult;
+import cn.rongcloud.moment.server.common.rest.RestResultCode;
+import cn.rongcloud.moment.server.common.utils.GsonUtil;
+import cn.rongcloud.moment.server.common.utils.UserHolder;
+import cn.rongcloud.moment.server.service.AuthService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.support.WebApplicationContextUtils;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.GenericFilterBean;
 
+import javax.annotation.Resource;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -27,11 +31,11 @@ public class JwtFilter extends GenericFilterBean {
     public static final String JWT_AUTH_DATA = "JWT_AUTH_DATA";
     public static final String USER_AGENT_TYPE = "USER_AGENT_TYPE";
 
-    @Autowired
-    private JwtTokenHelper tokenHelper;
+    @Resource
+    PassUrls passUrls;
 
-    @Autowired
-    private UserService userService;
+    @Resource
+    AuthService authService;
 
     @Override
     public void doFilter(final ServletRequest req,
@@ -40,25 +44,6 @@ public class JwtFilter extends GenericFilterBean {
         HttpServletRequest httpReq = (HttpServletRequest) req;
 
         log.debug("doFilter: " + httpReq.getRequestURL().toString());
-
-        if (null == tokenHelper) {
-            tokenHelper = ((WebApplicationContext) WebApplicationContextUtils.getWebApplicationContext(httpReq.getServletContext())).getBean(JwtTokenHelper.class);
-        }
-        final String token = httpReq.getHeader("RCMT-Token");
-        if (token != null) {
-            try {
-                JwtUser jwtUser = tokenHelper.checkJwtToken(token);
-
-                if (null != jwtUser) {
-                    httpReq.setAttribute(JWT_AUTH_DATA, jwtUser);
-                }
-            } catch (Exception e) {
-                log.error("caught error when check token:", e);
-            }
-        } else {
-            log.error("not found Authorization");
-        }
-
         String userAgent = httpReq.getHeader("user-agent");
         log.info("the request IP:{}, UA: {}", getIpAddr(httpReq), userAgent);
         if (null != userAgent) {
@@ -66,7 +51,34 @@ public class JwtFilter extends GenericFilterBean {
             httpReq.setAttribute(USER_AGENT_TYPE, type);
         }
 
-        chain.doFilter(req, res);
+        String reqMethod = httpReq.getMethod().toLowerCase();
+
+        AntPathMatcher antPathMatcher = new AntPathMatcher();
+        boolean excludes = passUrls.getAnonymousUrls().stream().filter(exclude ->
+                antPathMatcher.match(exclude, httpReq.getRequestURI())).findFirst().isPresent();
+        boolean access = true;
+        if (!excludes && !reqMethod.equals("options")) {
+            final String authorization = httpReq.getHeader("authorization");
+            if (authorization != null) {
+                try {
+                    this.authService.checkAuth(authorization);
+                    httpReq.setAttribute(JWT_AUTH_DATA, UserHolder.getUser());
+                } catch (RestException e) {
+                    access = false;
+                    this.failOver(res, e.getRestResult());
+                }
+            }else{
+                access = false;
+                this.failOver(res, RestResult.generic(RestResultCode.ERR_REQ_WITHOUT_REQIRED_AUTHORIZATION_HEADER));
+            }
+
+//            判断需要是否继续执行
+//            log.info("resp -> status: {}, data: {}", httpResp.getStatus(), httpResp.getOutputStream());
+        }
+        if (access) {
+            chain.doFilter(httpReq, res);
+            UserHolder.clear();
+        }
     }
 
     public  String getIpAddr(HttpServletRequest request) {
@@ -88,4 +100,14 @@ public class JwtFilter extends GenericFilterBean {
         }
         return ip;
     }
+
+    private void failOver(ServletResponse resp, RestResult restResult) {
+        resp.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        try {
+            resp.getWriter().write(GsonUtil.toJson(restResult));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
