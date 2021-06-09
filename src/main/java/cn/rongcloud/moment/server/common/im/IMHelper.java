@@ -23,6 +23,7 @@ public class IMHelper {
         IMRequestQueue.messageBuilder(CustomerConstant.SYSTEM_ID, ConversationType.SYSTEM, staffIds, message)
                 .persist(0)
                 .includeSender(0)
+                .imConfig(imConfig)
                 .buildAndSend();
     }
 }

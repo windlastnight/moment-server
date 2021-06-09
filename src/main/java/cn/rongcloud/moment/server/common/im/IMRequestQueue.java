@@ -273,6 +273,7 @@ public class IMRequestQueue {
             if( object.conversationType == ConversationType.SYSTEM) {
                 SystemMessage message = new SystemMessage(object.fromUser, object.targetIds, object.messageContent.getType(), object.messageContent, object.pushContent, object.pushData, object.isPersist, object.isCount, 0);
                 code = RongCloud.getInstance(object.imConfig.getAppKey(), object.imConfig.getSecret(), object.imConfig.getHost()).message.system.send(message).getCode();
+                LOGGER.info("call im publish message, message:{}, code:{}", GsonUtil.toJson(message), code);
             } else {
                 LOGGER.error("UnSupport conversation type: {}", object.conversationType);
                 return;
@@ -282,6 +283,7 @@ public class IMRequestQueue {
             return;
         } catch (Exception e) {
             LOGGER.error("Publish message http error: {}", e.getMessage());
+            e.printStackTrace();
         }
         /*
             code	描述	        		详细解释														HTTP 状态码

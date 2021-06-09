@@ -57,7 +57,7 @@ public class RceHelper {
     public RceRespResult queryStaffOrgIds(String userId) {
         try {
             HttpURLConnection conn = null;
-            conn = HttpUtil.CreateHttpConnection(rceConfig.getHost(), rceConfig.getSystemUid(), rceConfig.getSecret(), "/staff/" + userId + "/orgIds");
+            conn = HttpUtil.CreateHttpConnection(rceConfig.getHost(), rceConfig.getSystemUid(), rceConfig.getSecret(), "/staffs/" + userId + "/orgIds");
             conn.setRequestMethod("GET");
 
             HttpUtil.setBodyParameter("", conn);

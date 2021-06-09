@@ -25,7 +25,7 @@ public class TimelineController {
     }
 
     @GetMapping("/{uid}")
-    public RestResult getUserTimeLine(@RequestParam("from_feed_id") String fromFeedId, @RequestParam("size") Integer size, @PathVariable("uid") String userId) {
+    public RestResult getUserTimeLine(@RequestParam(value = "from_feed_id", required = false) String fromFeedId, @RequestParam("size") Integer size, @PathVariable("uid") String userId) {
         log.info("get user time line,operator:{}, from_feed_id:{}, size:{}, userId:{}", UserHolder.getUid(), fromFeedId, size, userId);
         return timelineService.getUserTimeLine(fromFeedId, size, userId);
     }

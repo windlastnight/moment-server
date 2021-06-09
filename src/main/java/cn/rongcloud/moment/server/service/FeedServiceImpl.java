@@ -15,6 +15,7 @@ import cn.rongcloud.moment.server.pojos.ReqFeedPublish;
 import cn.rongcloud.moment.server.common.rce.RceHelper;
 import cn.rongcloud.moment.server.common.rce.RceRespResult;
 import cn.rongcloud.moment.server.pojos.RespFeedInfo;
+import cn.rongcloud.moment.server.pojos.RespFeedPublish;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -66,7 +67,11 @@ public class FeedServiceImpl implements FeedService {
         redisOptService.setAdd(RedisKey.getMomentPublishNotifyUsersKey(), staffIds);
 
         //返回数据封装
-        RespFeedInfo resp = bulid(feed);
+        RespFeedPublish resp = new RespFeedPublish();
+        resp.setFeedId(feed.getFeedId());
+        resp.setFeedStatus(feed.getFeedStatus());
+        resp.setUpdateDt(feed.getUpdateDt());
+        resp.setCreateDt(feed.getCreateDt());
 
         return RestResult.success(resp);
     }
