@@ -13,7 +13,7 @@ import cn.rongcloud.moment.server.model.Feed;
 import cn.rongcloud.moment.server.model.Timeline;
 import cn.rongcloud.moment.server.pojos.ReqFeedPublish;
 import cn.rongcloud.moment.server.common.rce.RceHelper;
-import cn.rongcloud.moment.server.common.rce.RceQueryResult;
+import cn.rongcloud.moment.server.common.rce.RceRespResult;
 import cn.rongcloud.moment.server.pojos.RespFeedInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +49,7 @@ public class FeedServiceImpl implements FeedService {
     @Override
     public RestResult publish(String userId, ReqFeedPublish data) {
         //从 RCE 获取部门下所有员工 Id
-        RceQueryResult result = rceHelper.queryAllStaffId(data.getOrgIds(), userId);
+        RceRespResult result = rceHelper.queryAllStaffId(data.getOrgIds(), userId);
         if (!result.isSuccess()) {
             return RestResult.generic(RestResultCode.ERR_FEED_PUBLISH_ORG_ID_ERROR);
         }

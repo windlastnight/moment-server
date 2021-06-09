@@ -1,7 +1,7 @@
 package cn.rongcloud.moment.server.service;
 
 import cn.rongcloud.moment.server.common.rce.RceHelper;
-import cn.rongcloud.moment.server.common.rce.RceQueryResult;
+import cn.rongcloud.moment.server.common.rce.RceRespResult;
 import cn.rongcloud.moment.server.common.rest.RestException;
 import cn.rongcloud.moment.server.common.rest.RestResult;
 import cn.rongcloud.moment.server.common.rest.RestResultCode;
@@ -63,7 +63,7 @@ public class TimelineServiceImpl implements TimelineService {
             fromDate = timeline.getCreateDt();
         }
 
-        RceQueryResult rceQueryResult = rceHelper.queryStaffOrgIds(UserHolder.getUid());
+        RceRespResult rceQueryResult = rceHelper.queryStaffOrgIds(UserHolder.getUid());
         if (!rceQueryResult.isSuccess()){
             throw new RestException(RestResult.generic(RestResultCode.ERR_CALL_RCE_FAILED));
         }

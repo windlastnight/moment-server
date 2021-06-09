@@ -4,14 +4,14 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class RceQueryResult {
+public class RceRespResult {
 
     // 返回码
     Integer code;
     // result
     List<String> result;
 
-    public RceQueryResult(Integer code, List<String> result) {
+    public RceRespResult(Integer code, List<String> result) {
         this.code = code;
         this.result = result;
     }
