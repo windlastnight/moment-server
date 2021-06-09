@@ -1,9 +1,8 @@
 package cn.rongcloud.moment.server.controller;
 
-import cn.rongcloud.moment.server.common.jwt.JwtUser;
-import cn.rongcloud.moment.server.common.jwt.filter.JwtFilter;
 import cn.rongcloud.moment.server.common.rest.RestResult;
 import cn.rongcloud.moment.server.common.utils.GsonUtil;
+import cn.rongcloud.moment.server.common.utils.UserHolder;
 import cn.rongcloud.moment.server.pojos.RepIds;
 import cn.rongcloud.moment.server.pojos.ReqFeedPublish;
 import cn.rongcloud.moment.server.service.FeedService;
@@ -22,29 +21,29 @@ import javax.validation.Valid;
 public class FeedController {
 
     @Autowired
-    private FeedService feedService;
+    FeedService feedService;
 
     @PostMapping
-    public RestResult publish(@RequestAttribute(value = JwtFilter.JWT_AUTH_DATA) JwtUser authUser, @Valid @RequestBody ReqFeedPublish data) {
-        log.info("publish feed, operator:{}, data:{}", authUser.getUserId(), GsonUtil.toJson(data));
-        return feedService.publish(authUser.getUserId(), data);
+    public RestResult publish(@Valid @RequestBody ReqFeedPublish data) {
+        log.info("publish feed, operator:{}, data:{}", UserHolder.getUid(), GsonUtil.toJson(data));
+        return feedService.publish(UserHolder.getUid(), data);
     }
 
     @DeleteMapping("/{feedId}")
-    public RestResult delete(@RequestAttribute(value = JwtFilter.JWT_AUTH_DATA) JwtUser authUser, @PathVariable String feedId) {
-        log.info("delete feed, operator:{}, data:{}", authUser.getUserId(), feedId);
-        return feedService.delete(authUser.getUserId(), feedId);
+    public RestResult delete(@PathVariable String feedId) {
+        log.info("delete feed, operator:{}, data:{}", UserHolder.getUid(), feedId);
+        return feedService.delete(UserHolder.getUid(), feedId);
     }
 
     @GetMapping("/{feedId}")
-    public RestResult getFeedInfo(@RequestAttribute(value = JwtFilter.JWT_AUTH_DATA) JwtUser authUser, @PathVariable String feedId) {
-        log.info("get feed, operator:{}, data:{}", authUser.getUserId(), feedId);
-        return feedService.getFeedInfo(authUser.getUserId(), feedId);
+    public RestResult getFeedInfo(@PathVariable String feedId) {
+        log.info("get feed, operator:{}, data:{}", UserHolder.getUid(), feedId);
+        return feedService.getFeedInfo(UserHolder.getUid(), feedId);
     }
 
     @PostMapping("/batch")
-    public RestResult batchGetFeedInfo(@RequestAttribute(value = JwtFilter.JWT_AUTH_DATA) JwtUser authUser, @RequestBody RepIds data) {
-        log.info("batch get feed, operator:{}, data:{}", authUser.getUserId(), GsonUtil.toJson(data));
-        return feedService.batchGetFeedInfo(authUser.getUserId(), data.getIds());
+    public RestResult batchGetFeedInfo(@RequestBody RepIds data) {
+        log.info("batch get feed, operator:{}, data:{}", UserHolder.getUid(), GsonUtil.toJson(data));
+        return feedService.batchGetFeedInfo(UserHolder.getUid(), data.getIds());
     }
 }
