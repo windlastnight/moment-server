@@ -19,9 +19,15 @@ public class TimelineController {
     private TimelineService timelineService;
 
     @GetMapping
-    public RestResult getTimeLine(@RequestParam("from_feed_id") String fromFeedId, @RequestParam("size") Integer size) {
-        log.info("get time line,operator:{}, from_feed_id:{}, size:{}", UserHolder.getUid(), fromFeedId, size);
-        return timelineService.getTimeLine(fromFeedId, size);
+    public RestResult getMineTimeLine(@RequestParam(value = "from_feed_id", required = false) String fromFeedId, @RequestParam("size") Integer size) {
+        log.info("get mine time line,operator:{}, from_feed_id:{}, size:{}", UserHolder.getUid(), fromFeedId, size);
+        return timelineService.getMineTimeLine(fromFeedId, size);
+    }
+
+    @GetMapping("/{uid}")
+    public RestResult getUserTimeLine(@RequestParam("from_feed_id") String fromFeedId, @RequestParam("size") Integer size, @PathVariable("uid") String userId) {
+        log.info("get user time line,operator:{}, from_feed_id:{}, size:{}, userId:{}", UserHolder.getUid(), fromFeedId, size, userId);
+        return timelineService.getUserTimeLine(fromFeedId, size, userId);
     }
 
 }
