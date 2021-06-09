@@ -19,7 +19,7 @@ import javax.validation.Valid;
  */
 
 @RestController
-@RequestMapping("/moments")
+@RequestMapping("/user")
 @Slf4j
 public class AuthController {
 
