@@ -20,11 +20,26 @@ public class RceHelper {
     public RceQueryResult queryAllStaffId(List<String> orgIds, String userId) {
         try {
             HttpURLConnection conn = null;
-            conn = HttpUtil.CreateHttpConnection(rceConfig.getHost(), rceConfig.getSystemUid(), rceConfig.getSecret(), "/misc/organization/all_staff_ids");
+            conn = HttpUtil.CreateHttpConnection(rceConfig.getHost(), rceConfig.getSystemUid(), rceConfig.getSecret(), "/organization/staffIds");
+            conn.setRequestMethod("POST");
             Map<String, Object> requestMap = new HashMap<>();
             requestMap.put("org_ids", orgIds);
             requestMap.put("user_id", userId);
             HttpUtil.setBodyParameter(GsonUtil.toJson(requestMap), conn);
+            return (RceQueryResult) GsonUtil.fromJson(HttpUtil.returnResult(conn), RceQueryResult.class);
+        } catch (Exception e) {
+            log.info("failed to get staffIds from rce, error:{}", e.getMessage());
+        }
+        return null;
+    }
+
+    public RceQueryResult queryStaffOrgIds(String userId) {
+        try {
+            HttpURLConnection conn = null;
+            conn = HttpUtil.CreateHttpConnection(rceConfig.getHost(), rceConfig.getSystemUid(), rceConfig.getSecret(), "/staff/" + userId + "/orgIds");
+            conn.setRequestMethod("GET");
+
+            HttpUtil.setBodyParameter("", conn);
             return (RceQueryResult) GsonUtil.fromJson(HttpUtil.returnResult(conn), RceQueryResult.class);
         } catch (Exception e) {
             log.info("failed to get staffIds from rce, error:{}", e.getMessage());

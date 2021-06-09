@@ -13,7 +13,7 @@ public enum RestResultCode {
     ERR_ACCESS_DENIED(10004, "Access denied"),
     ERR_BAD_REQUEST(10005, "Bad request"),
     ERR_LOGIN_AUTH_FAILED(10006, "login auth failed"),
-    ERR_LOGIN_API_CALL_FAILED(10007, "req failed to rce"),
+    ERR_CALL_RCE_FAILED(10007, "req failed to rce"),
     ERR_REQ_WITHOUT_REQIRED_AUTHORIZATION_HEADER(10008, "req lack required header authorization"),
 
     ERR_FEED_PUBLISH_ORG_ID_ERROR(20000, "The org not existed or you don't have permission"),
