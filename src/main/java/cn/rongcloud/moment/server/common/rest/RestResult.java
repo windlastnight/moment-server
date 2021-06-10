@@ -15,7 +15,7 @@ public class RestResult {
     @JsonProperty("msg")
     private String msg;
 
-    @JsonProperty("data")
+    @JsonProperty("result")
     private Object result = null;
 
     public RestResult setCode(int code) {

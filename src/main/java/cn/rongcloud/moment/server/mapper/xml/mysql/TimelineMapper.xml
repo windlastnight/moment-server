@@ -37,7 +37,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <foreach item="orgId" collection="orgIds" open="(" separator="," close=")">
             #{orgId}
         </foreach>
-        AND CREATE_DT > #{createDt} LIMIT #{size}
+        AND CREATE_DT &lt; #{createDt} LIMIT #{size} ORDER BY CREATE_DT DESC
     </select>
 
 

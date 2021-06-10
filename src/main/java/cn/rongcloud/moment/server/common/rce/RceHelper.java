@@ -59,8 +59,6 @@ public class RceHelper {
             HttpURLConnection conn = null;
             conn = HttpUtil.CreateHttpConnection(rceConfig.getHost(), rceConfig.getSystemUid(), rceConfig.getSecret(), "/staffs/" + userId + "/orgIds");
             conn.setRequestMethod("GET");
-
-            HttpUtil.setBodyParameter("", conn);
             return (RceRespResult) GsonUtil.fromJson(HttpUtil.returnResult(conn), RceRespResult.class);
         } catch (Exception e) {
             log.info("failed to query staff orgIds from rce, error:{}", e.getMessage());
