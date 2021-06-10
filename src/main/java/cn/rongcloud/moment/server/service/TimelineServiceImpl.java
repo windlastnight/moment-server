@@ -54,7 +54,7 @@ public class TimelineServiceImpl implements TimelineService {
 
         List<String> timelines = null;
 
-        Date fromDate = DateTimeUtils.strToDate("2020-01-01");
+        Date fromDate = DateTimeUtils.currentDt();
         if (!StringUtils.isEmpty(fromFeedId)) {
             Timeline timeline = timelineMapper.getTimelineByFeedId(fromFeedId);
             if (timeline == null) {
@@ -63,7 +63,7 @@ public class TimelineServiceImpl implements TimelineService {
             fromDate = timeline.getCreateDt();
         }
 
-        RceRespResult rceQueryResult = rceHelper.queryStaffOrgIds(UserHolder.getUid());
+        RceRespResult rceQueryResult = rceHelper.queryStaffOrgIds(userId);
         if (!rceQueryResult.isSuccess()){
             throw new RestException(RestResult.generic(RestResultCode.ERR_CALL_RCE_FAILED));
         }
