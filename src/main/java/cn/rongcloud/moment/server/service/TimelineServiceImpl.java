@@ -37,45 +37,46 @@ public class TimelineServiceImpl implements TimelineService {
     private RceHelper rceHelper;
 
     @Override
-    public RestResult getMineTimeLine(String fromFeedId, Integer size) {
-
-        List<String> timelines = getTimeLine(fromFeedId, size, UserHolder.getUid());
-        return RestResult.success(timelines);
-    }
-
-    @Override
-    public RestResult getUserTimeLine(String fromFeedId, Integer size, String userId) {
-        //TODO 校验用户是否有权限查看这个人的朋友圈
-        List<String> timelines = getTimeLine(fromFeedId, size, userId);
-        return RestResult.success(timelines);
-    }
-
-    private List<String> getTimeLine(String fromFeedId, Integer size, String userId){
-
+    public RestResult getTimeLine(String fromFeedId, Integer size) {
         List<String> timelines = null;
 
         Date fromDate = DateTimeUtils.currentDt();
         if (!StringUtils.isEmpty(fromFeedId)) {
             Timeline timeline = timelineMapper.getTimelineByFeedId(fromFeedId);
             if (timeline == null) {
-                throw new RestException(RestResult.generic(RestResultCode.ERR_FEED_NOT_EXISTED));
+                return RestResult.generic(RestResultCode.ERR_FEED_NOT_EXISTED);
             }
             fromDate = timeline.getCreateDt();
         }
 
-        RceRespResult rceQueryResult = rceHelper.queryStaffOrgIds(userId);
+        RceRespResult rceQueryResult = rceHelper.queryStaffOrgIds(UserHolder.getUid());
         if (!rceQueryResult.isSuccess()){
-            throw new RestException(RestResult.generic(RestResultCode.ERR_CALL_RCE_FAILED));
+            return RestResult.generic(RestResultCode.ERR_CALL_RCE_FAILED);
         }
 
         List<String> orgIds = rceQueryResult.getResult();
         if (orgIds == null || orgIds.isEmpty()) {
             timelines = new ArrayList<>();
-            return timelines;
+        } else {
+            timelines = timelineMapper.getTimeline(orgIds, fromDate, size);
         }
 
-        timelines = timelineMapper.getTimeline(orgIds, fromDate, size);
-
-        return timelines;
+        return RestResult.success(timelines);
     }
+
+    @Override
+    public RestResult getUserTimeLine(String fromFeedId, Integer size, String userId) {
+        //TODO 校验用户是否有权限查看这个人的朋友圈
+        Date fromDate = DateTimeUtils.currentDt();
+        if (!StringUtils.isEmpty(fromFeedId)) {
+            Timeline timeline = timelineMapper.getTimelineByFeedId(fromFeedId);
+            if (timeline == null) {
+                return RestResult.generic(RestResultCode.ERR_FEED_NOT_EXISTED);
+            }
+            fromDate = timeline.getCreateDt();
+        }
+        List<String> timelines = feedMapper.getFeedIdsByUserId(userId, fromDate, size);
+        return RestResult.success(timelines);
+    }
+
 }

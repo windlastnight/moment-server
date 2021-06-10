@@ -4,6 +4,7 @@ import cn.rongcloud.moment.server.model.Feed;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Date;
 import java.util.List;
 
 @Mapper
@@ -16,4 +17,6 @@ public interface FeedMapper {
     List<Feed> getFeedsByIds(@Param("feedIds") List<String> feedIds);
 
     void deleteFeed(@Param("feedId") String feedId);
+
+    List<String> getFeedIdsByUserId(@Param("userId") String userId, @Param("createDt") Date date, @Param("size") Integer size);
 }

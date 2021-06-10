@@ -57,4 +57,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </foreach>
     </select>
 
+    <select id="getFeedIdsByUserId" resultType="java.lang.String">
+        SELECT FEED_ID FROM T_FEED
+        WHERE USER_ID = #{userId} AND CREATE_DT &lt; #{createDt} ORDER BY CREATE_DT DESC LIMIT #{size}
+    </select>
+
 </mapper>
