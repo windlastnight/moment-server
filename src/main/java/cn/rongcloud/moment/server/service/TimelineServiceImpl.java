@@ -10,6 +10,7 @@ import cn.rongcloud.moment.server.common.utils.UserHolder;
 import cn.rongcloud.moment.server.mapper.FeedMapper;
 import cn.rongcloud.moment.server.mapper.TimelineMapper;
 import cn.rongcloud.moment.server.model.Timeline;
+import cn.rongcloud.moment.server.pojos.RespTimeline;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +62,9 @@ public class TimelineServiceImpl implements TimelineService {
             timelines = timelineMapper.getTimeline(orgIds, fromDate, size);
         }
 
-        return RestResult.success(timelines);
+        RespTimeline respTimeline = new RespTimeline();
+        respTimeline.setFeedIds(timelines);
+        return RestResult.success(respTimeline);
     }
 
     @Override
@@ -76,7 +79,9 @@ public class TimelineServiceImpl implements TimelineService {
             fromDate = timeline.getCreateDt();
         }
         List<String> timelines = feedMapper.getFeedIdsByUserId(userId, fromDate, size);
-        return RestResult.success(timelines);
+        RespTimeline respTimeline = new RespTimeline();
+        respTimeline.setFeedIds(timelines);
+        return RestResult.success(respTimeline);
     }
 
 }
