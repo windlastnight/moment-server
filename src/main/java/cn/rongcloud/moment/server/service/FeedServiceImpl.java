@@ -7,6 +7,7 @@ import cn.rongcloud.moment.server.common.rest.RestResult;
 import cn.rongcloud.moment.server.common.rest.RestResultCode;
 import cn.rongcloud.moment.server.common.utils.DateTimeUtils;
 import cn.rongcloud.moment.server.common.utils.IdentifierUtils;
+import cn.rongcloud.moment.server.common.utils.UserHolder;
 import cn.rongcloud.moment.server.enums.FeedStatus;
 import cn.rongcloud.moment.server.mapper.FeedMapper;
 import cn.rongcloud.moment.server.mapper.TimelineMapper;
@@ -17,7 +18,9 @@ import cn.rongcloud.moment.server.common.rce.RceHelper;
 import cn.rongcloud.moment.server.common.rce.RceRespResult;
 import cn.rongcloud.moment.server.pojos.RespFeedInfo;
 import cn.rongcloud.moment.server.pojos.RespFeedPublish;
+import cn.rongcloud.moment.server.pojos.RespGetNewFeed;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -128,6 +131,31 @@ public class FeedServiceImpl implements FeedService {
         //TODO 获取前 50 条评论
 
         return RestResult.success(result);
+    }
+
+    @Override
+    public RestResult getNewFeed(String latestFeedId) {
+        RespGetNewFeed resp = new RespGetNewFeed();
+        resp.setHasNew(false);
+
+        Long fromTimelineId = null;
+        if (!StringUtils.isEmpty(latestFeedId)) {
+            fromTimelineId = timelineMapper.getMaxTimelineIdByFeedId(latestFeedId);
+        }
+        RceRespResult rceQueryResult = rceHelper.queryStaffOrgIds(UserHolder.getUid());
+        if (!rceQueryResult.isSuccess()){
+            return RestResult.generic(RestResultCode.ERR_CALL_RCE_FAILED);
+        }
+        List<String> orgIds = rceQueryResult.getResult();
+        if (orgIds == null || orgIds.isEmpty()) {
+            return RestResult.success(resp);
+        }
+
+        String feedId = timelineMapper.getNewFeed(orgIds, fromTimelineId);
+        if (feedId != null) {
+            resp.setHasNew(true);
+        }
+        return RestResult.success(resp);
     }
 
     @Override

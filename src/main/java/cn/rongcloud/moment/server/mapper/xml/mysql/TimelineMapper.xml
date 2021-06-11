@@ -27,8 +27,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         DELETE FROM T_TIMELINE WHERE FEED_ID = #{feedId}
     </delete>
 
-    <select id="getTimelineByFeedId" resultMap="timelineResult">
-        <include refid="selectTimelineVo"/>
+    <select id="getMinTimelineIdByFeedId" resultType="java.lang.Long">
+        SELECT ID FROM T_TIMELINE
+        WHERE FEED_ID = #{feedId} ORDER BY ID ASC limit 1
+    </select>
+
+    <select id="getMaxTimelineIdByFeedId" resultType="java.lang.Long">
+        SELECT ID FROM T_TIMELINE
         WHERE FEED_ID = #{feedId} ORDER BY ID DESC limit 1
     </select>
 
@@ -40,6 +45,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </foreach>
         <if test="fromTimelineAutoIncId != null"> AND ID &lt; #{fromTimelineAutoIncId} </if>
         ORDER BY ID DESC LIMIT #{size}
+    </select>
+
+    <select id="getNewFeed" resultType="java.lang.String">
+        SELECT FEED_ID FROM T_TIMELINE
+        WHERE ORG_ID IN
+        <foreach item="orgId" collection="orgIds" open="(" separator="," close=")">
+            #{orgId}
+        </foreach>
+        <if test="fromTimelineAutoIncId != null"> AND ID &gt; #{fromTimelineAutoIncId} </if>
+        LIMIT 1
     </select>
 
 

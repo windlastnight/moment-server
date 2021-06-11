@@ -46,4 +46,10 @@ public class FeedController {
         log.info("batch get feed, operator:{}, data:{}", UserHolder.getUid(), GsonUtil.toJson(data));
         return feedService.batchGetFeedInfo(UserHolder.getUid(), data.getIds());
     }
+
+    @GetMapping("/new")
+    public RestResult getNewFeed(@RequestParam("latest_feed_id") String latestFeedId) {
+        log.info("get new feed, operator:{}, data:{}", UserHolder.getUid(), latestFeedId);
+        return feedService.getNewFeed(latestFeedId);
+    }
 }

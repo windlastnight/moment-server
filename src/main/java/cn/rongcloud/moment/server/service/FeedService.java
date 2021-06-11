@@ -19,5 +19,7 @@ public interface FeedService {
 
     RestResult batchGetFeedInfo(String userId, List<String> feedIds);
 
+    RestResult getNewFeed(String latestFeedId);
+
     Feed checkFeedExists(String feedId) throws RestException;
 }

@@ -2,23 +2,18 @@ package cn.rongcloud.moment.server.service;
 
 import cn.rongcloud.moment.server.common.rce.RceHelper;
 import cn.rongcloud.moment.server.common.rce.RceRespResult;
-import cn.rongcloud.moment.server.common.rest.RestException;
 import cn.rongcloud.moment.server.common.rest.RestResult;
 import cn.rongcloud.moment.server.common.rest.RestResultCode;
-import cn.rongcloud.moment.server.common.utils.DateTimeUtils;
 import cn.rongcloud.moment.server.common.utils.UserHolder;
 import cn.rongcloud.moment.server.mapper.FeedMapper;
 import cn.rongcloud.moment.server.mapper.TimelineMapper;
 import cn.rongcloud.moment.server.model.Feed;
-import cn.rongcloud.moment.server.model.Timeline;
 import cn.rongcloud.moment.server.pojos.RespTimeline;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 
@@ -44,11 +39,10 @@ public class TimelineServiceImpl implements TimelineService {
 
         Long fromTimelineAutoIncId = null;
         if (!StringUtils.isEmpty(fromFeedId)) {
-            Timeline timeline = timelineMapper.getTimelineByFeedId(fromFeedId);
-            if (timeline == null) {
+            fromTimelineAutoIncId = timelineMapper.getMinTimelineIdByFeedId(fromFeedId);
+            if (fromTimelineAutoIncId == null) {
                 return RestResult.generic(RestResultCode.ERR_FEED_NOT_EXISTED);
             }
-            fromTimelineAutoIncId = timeline.getId();
         }
 
         RceRespResult rceQueryResult = rceHelper.queryStaffOrgIds(UserHolder.getUid());
