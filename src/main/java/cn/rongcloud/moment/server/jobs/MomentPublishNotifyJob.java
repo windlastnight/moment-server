@@ -43,7 +43,7 @@ public class MomentPublishNotifyJob {
         List result = redisTemplate.execute(luaScript, keys);
         if (result != null && !result.isEmpty()) {
             List<String> staffIds = (List<String>) result.get(0);
-            imHelper.publishFeed(staffIds);
+            imHelper.publishFeedNtf(staffIds);
         }
         log.info("moment publish notify job end...");
     }

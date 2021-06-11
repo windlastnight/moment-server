@@ -20,7 +20,7 @@ spring:
 ## JWT 鉴权配置
 jwt:
   secret: "ay9pL#$MeetingServer"
-  ttlInMilliSec: 86400000
+  ttlInMilliSec: 8640000000
 
 ## 融云 IM 配置
 im:
@@ -30,9 +30,9 @@ im:
 
 ## 融云 RCE 配置
 rce:
-  systemUid: xxx
-  secret: xxx
-  host: http://127.0.0.1/api
+  systemUid: fGpg5fuCsF2PWCD4uZ8Dzh
+  secret: bLGTG21yiRTMN
+  host: http://127.0.0.1:8080/rce/api
 
 ## 日志配置
 logging:
@@ -70,7 +70,8 @@ ds:
 
 moment:
   pass:
-    anonymousUrls: /**/*/moment/auth
+    anonymousUrls:
+      - /**/*/moment/auth
   publish_notify_corn: 0 */1 * * * ?
   system_manager_id: xxxxxxxx #系统管理员Id
 

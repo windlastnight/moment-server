@@ -18,6 +18,10 @@ public enum RestResultCode {
 
     ERR_FEED_PUBLISH_ORG_ID_ERROR(20000, "The org not existed or you don't have permission"),
     ERR_FEED_NOT_EXISTED(20001, "The feed does not existed"),
+
+    ERR_COMMENT_NOT_EXISTED(20101, "The comment does not existed"),
+    ERR_LIKE_USER_ALEADY_LIKED(20102, "user liked it"),
+    ERR_LIKE_USER_NO_LIKE(20103, "user have no like it"),
     ;
 
     private int code;

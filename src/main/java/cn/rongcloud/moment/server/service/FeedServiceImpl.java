@@ -2,6 +2,7 @@ package cn.rongcloud.moment.server.service;
 
 import cn.rongcloud.moment.server.common.redis.RedisKey;
 import cn.rongcloud.moment.server.common.redis.RedisOptService;
+import cn.rongcloud.moment.server.common.rest.RestException;
 import cn.rongcloud.moment.server.common.rest.RestResult;
 import cn.rongcloud.moment.server.common.rest.RestResultCode;
 import cn.rongcloud.moment.server.common.utils.DateTimeUtils;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by sunyinglong on 2020/6/3
@@ -126,6 +128,15 @@ public class FeedServiceImpl implements FeedService {
         //TODO 获取前 50 条评论
 
         return RestResult.success(result);
+    }
+
+    @Override
+    public Feed checkFeedExists(String feedId) throws RestException {
+        Feed feed = this.feedMapper.getFeedById(feedId);
+        if (Objects.isNull(feed) || Objects.equals(feed.getFeedStatus(), FeedStatus.DELETED.getValue())) {
+            throw new RestException(RestResult.generic(RestResultCode.ERR_FEED_NOT_EXISTED));
+        }
+        return feed;
     }
 
     private RespFeedInfo bulid(Feed feed){

@@ -3,7 +3,6 @@ package cn.rongcloud.moment.server.service;
 import cn.rongcloud.moment.server.common.jwt.JwtToken;
 import cn.rongcloud.moment.server.common.jwt.JwtTokenHelper;
 import cn.rongcloud.moment.server.common.jwt.JwtUser;
-import cn.rongcloud.moment.server.common.jwt.config.JwtProperties;
 import cn.rongcloud.moment.server.common.rce.RceHelper;
 import cn.rongcloud.moment.server.common.rce.RceRespResult;
 import cn.rongcloud.moment.server.common.rest.RestException;
@@ -14,7 +13,6 @@ import cn.rongcloud.moment.server.pojos.ReqAuth;
 import cn.rongcloud.moment.server.pojos.RespAuth;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.Resource;
 import java.io.IOException;
@@ -27,13 +25,7 @@ import java.io.IOException;
 public class AuthServiceImpl implements AuthService {
 
     @Resource
-    private RestTemplate restTemplate;
-
-    @Resource
     private JwtTokenHelper tokenHelper;
-
-    @Resource
-    private JwtProperties jwtProperties;
 
     @Resource
     private RceHelper rceHelper;
@@ -50,7 +42,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void checkAuth(String token){
+    public void checkAuth(String token) throws RestException {
         try {
             JwtUser jwtUser = this.tokenHelper.checkJwtToken(token);
             UserHolder.setUser(jwtUser);
