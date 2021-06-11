@@ -5,13 +5,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 <mapper namespace="cn.rongcloud.moment.server.mapper.TimelineMapper">
 
     <resultMap type="cn.rongcloud.moment.server.model.Timeline" id="timelineResult">
+        <result property="id" column="ID"/>
         <result property="feedId" column="FEED_ID"/>
         <result property="orgId" column="ORG_ID"/>
         <result property="createDt" column="CREATE_DT"/>
     </resultMap>
 
     <sql id="selectTimelineVo">
-        SELECT FEED_ID, ORG_ID, CREATE_DT FROM T_TIMELINE
+        SELECT ID, FEED_ID, ORG_ID, CREATE_DT FROM T_TIMELINE
     </sql>
 
     <insert id="batchInsertTimeline">
@@ -28,16 +29,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <select id="getTimelineByFeedId" resultMap="timelineResult">
         <include refid="selectTimelineVo"/>
-        WHERE FEED_ID = #{feedId}
+        WHERE FEED_ID = #{feedId} ORDER BY ID DESC limit 1
     </select>
 
     <select id="getTimeline" resultType="java.lang.String">
-        SELECT FEED_ID FROM T_TIMELINE
+        SELECT DISTINCT FEED_ID FROM T_TIMELINE
         WHERE ORG_ID IN
         <foreach item="orgId" collection="orgIds" open="(" separator="," close=")">
             #{orgId}
         </foreach>
-        AND CREATE_DT &lt; #{createDt} ORDER BY CREATE_DT DESC LIMIT #{size}
+        <if test="fromTimelineAutoIncId != null"> AND ID &lt; #{fromTimelineAutoIncId} </if>
+        ORDER BY ID DESC LIMIT #{size}
     </select>
 
 

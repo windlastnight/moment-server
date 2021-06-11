@@ -5,6 +5,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 <mapper namespace="cn.rongcloud.moment.server.mapper.FeedMapper">
 
     <resultMap type="cn.rongcloud.moment.server.model.Feed" id="feedResult">
+        <result property="id" column="ID"/>
         <result property="feedId" column="FEED_ID"/>
         <result property="userId" column="USER_ID"/>
         <result property="feedType" column="FEED_TYPE"/>
@@ -15,7 +16,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectTFeedVo">
-        SELECT FEED_ID, USER_ID, FEED_TYPE, FEED_CONTENT, FEED_STATUS, CREATE_DT, UPDATE_DT FROM T_FEED
+        SELECT ID, FEED_ID, USER_ID, FEED_TYPE, FEED_CONTENT, FEED_STATUS, CREATE_DT, UPDATE_DT FROM T_FEED
     </sql>
 
     <insert id="insertFeed" parameterType="cn.rongcloud.moment.server.model.Feed" useGeneratedKeys="true" keyProperty="id">
@@ -59,7 +60,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <select id="getFeedIdsByUserId" resultType="java.lang.String">
         SELECT FEED_ID FROM T_FEED
-        WHERE USER_ID = #{userId} AND CREATE_DT &lt; #{createDt} ORDER BY CREATE_DT DESC LIMIT #{size}
+        WHERE USER_ID = #{userId}
+        <if test="fromFeedAutoIncId != null"> AND ID &lt; #{fromFeedAutoIncId} </if>
+        ORDER BY ID DESC LIMIT #{size}
     </select>
 
 </mapper>

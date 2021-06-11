@@ -9,6 +9,7 @@ import cn.rongcloud.moment.server.common.utils.DateTimeUtils;
 import cn.rongcloud.moment.server.common.utils.UserHolder;
 import cn.rongcloud.moment.server.mapper.FeedMapper;
 import cn.rongcloud.moment.server.mapper.TimelineMapper;
+import cn.rongcloud.moment.server.model.Feed;
 import cn.rongcloud.moment.server.model.Timeline;
 import cn.rongcloud.moment.server.pojos.RespTimeline;
 import lombok.extern.slf4j.Slf4j;
@@ -41,13 +42,13 @@ public class TimelineServiceImpl implements TimelineService {
     public RestResult getTimeLine(String fromFeedId, Integer size) {
         List<String> timelines = null;
 
-        Date fromDate = DateTimeUtils.currentDt();
+        Long fromTimelineAutoIncId = null;
         if (!StringUtils.isEmpty(fromFeedId)) {
             Timeline timeline = timelineMapper.getTimelineByFeedId(fromFeedId);
             if (timeline == null) {
                 return RestResult.generic(RestResultCode.ERR_FEED_NOT_EXISTED);
             }
-            fromDate = timeline.getCreateDt();
+            fromTimelineAutoIncId = timeline.getId();
         }
 
         RceRespResult rceQueryResult = rceHelper.queryStaffOrgIds(UserHolder.getUid());
@@ -59,7 +60,7 @@ public class TimelineServiceImpl implements TimelineService {
         if (orgIds == null || orgIds.isEmpty()) {
             timelines = new ArrayList<>();
         } else {
-            timelines = timelineMapper.getTimeline(orgIds, fromDate, size);
+            timelines = timelineMapper.getTimeline(orgIds, fromTimelineAutoIncId, size);
         }
 
         RespTimeline respTimeline = new RespTimeline();
@@ -70,15 +71,15 @@ public class TimelineServiceImpl implements TimelineService {
     @Override
     public RestResult getUserTimeLine(String fromFeedId, Integer size, String userId) {
         //TODO 校验用户是否有权限查看这个人的朋友圈
-        Date fromDate = DateTimeUtils.currentDt();
+        Long fromFeedAutoIncId = null;
         if (!StringUtils.isEmpty(fromFeedId)) {
-            Timeline timeline = timelineMapper.getTimelineByFeedId(fromFeedId);
-            if (timeline == null) {
+            Feed feed = feedMapper.getFeedById(fromFeedId);
+            if (feed == null) {
                 return RestResult.generic(RestResultCode.ERR_FEED_NOT_EXISTED);
             }
-            fromDate = timeline.getCreateDt();
+            fromFeedAutoIncId = feed.getId();
         }
-        List<String> timelines = feedMapper.getFeedIdsByUserId(userId, fromDate, size);
+        List<String> timelines = feedMapper.getFeedIdsByUserId(userId, fromFeedAutoIncId, size);
         RespTimeline respTimeline = new RespTimeline();
         respTimeline.setFeedIds(timelines);
         return RestResult.success(respTimeline);

@@ -6,6 +6,7 @@ import java.util.Date;
 
 @Data
 public class Feed {
+    private Long id;
     private String feedId;
     private String userId;
     private Integer feedType;

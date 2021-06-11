@@ -16,5 +16,5 @@ public interface TimelineMapper {
 
     Timeline getTimelineByFeedId(@Param("feedId") String feedId);
 
-    List<String> getTimeline(@Param("orgIds") List<String> orgIds, @Param("createDt") Date date, @Param("size") Integer size);
+    List<String> getTimeline(@Param("orgIds") List<String> orgIds, @Param("fromTimelineAutoIncId") Long fromTimelineAutoIncId, @Param("size") Integer size);
 }

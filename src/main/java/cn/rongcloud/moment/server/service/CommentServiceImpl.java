@@ -62,8 +62,10 @@ public class CommentServiceImpl implements CommentService {
         comment.setCommentId(IdentifierUtils.uuid24());
         this.commentMapper.insertSelective(comment);
 
+        //TODO 修改
         List<String> receivers = this.getCommentNtfRecivers(feed);
         receivers.add(feed.getUserId());
+        //TODO 完善
         this.imHelper.publishCommentNtf(receivers);
 
         RespCreateComment respCreateComment = new RespCreateComment();
@@ -85,6 +87,7 @@ public class CommentServiceImpl implements CommentService {
         this.feedService.checkFeedExists(feedId);
         Comment comment = this.commentMapper.selectByPrimaryKey(commentId);
         if (Objects.isNull(comment) || !Objects.equals(comment.getFeedId(), feedId)) {
+            //TODO 提示错误码
             throw new RestException(RestResult.generic(RestResultCode.ERR_FEED_NOT_EXISTED));
         } else if (!Objects.equals(comment.getUserId(), UserHolder.getUid())) {
             throw new RestException(RestResult.generic(RestResultCode.ERR_FEED_NOT_EXISTED));
@@ -102,6 +105,7 @@ public class CommentServiceImpl implements CommentService {
             }
         }
 
+        //TODO 查询语句？
         List<Comment> comments = this.commentMapper.selectPagedComment(page);
         List<RespComment> res = comments.stream().map(cm -> {
             RespComment respComment = new RespComment();

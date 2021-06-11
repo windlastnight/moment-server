@@ -18,5 +18,5 @@ public interface FeedMapper {
 
     void deleteFeed(@Param("feedId") String feedId);
 
-    List<String> getFeedIdsByUserId(@Param("userId") String userId, @Param("createDt") Date date, @Param("size") Integer size);
+    List<String> getFeedIdsByUserId(@Param("userId") String userId, @Param("fromFeedAutoIncId") Long fromFeedAutoIncId, @Param("size") Integer size);
 }
