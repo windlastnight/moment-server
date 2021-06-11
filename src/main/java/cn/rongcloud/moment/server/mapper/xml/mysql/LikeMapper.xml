@@ -104,7 +104,7 @@
     from T_LIKE where
     FEED_ID=#{feedId}
     <if test="page.fromId != null and page.fromId != ''">
-      and  ID gt; #{page.fromId}
+      and  ID &gt; #{page.fromId}
     </if>
     limit #{page.size}
   </select>
