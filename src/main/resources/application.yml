@@ -72,6 +72,11 @@ moment:
   pass:
     anonymousUrls:
       - /**/*/moment/auth
+      - /**/*/doc.html
+      - /**/*/*.js
+      - /**/*/swagger-resources/**
+      - /**/*/favicon.ico
+      - /**/*/v2/**
   publish_notify_corn: 0 */1 * * * ?
   system_manager_id: xxxxxxxx #系统管理员Id
 
