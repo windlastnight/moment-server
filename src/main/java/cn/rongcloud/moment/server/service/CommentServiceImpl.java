@@ -6,14 +6,15 @@ import cn.rongcloud.moment.server.common.rest.RestResult;
 import cn.rongcloud.moment.server.common.rest.RestResultCode;
 import cn.rongcloud.moment.server.common.utils.IdentifierUtils;
 import cn.rongcloud.moment.server.common.utils.UserHolder;
+import cn.rongcloud.moment.server.enums.MomentsCommentMsgType;
 import cn.rongcloud.moment.server.mapper.CommentMapper;
 import cn.rongcloud.moment.server.model.Comment;
+import cn.rongcloud.moment.server.model.CommentNotifyData;
 import cn.rongcloud.moment.server.model.Feed;
 import cn.rongcloud.moment.server.pojos.Paged;
 import cn.rongcloud.moment.server.pojos.ReqCreateComment;
 import cn.rongcloud.moment.server.pojos.RespComment;
 import cn.rongcloud.moment.server.pojos.RespCreateComment;
-import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -51,7 +52,7 @@ public class CommentServiceImpl implements CommentService {
 //        2.检查replyto是否有效TApplicationTypeMapper.xml
 
         String replyTo = reqComment.getReplyTo();
-        if (Objects.nonNull(replyTo)) {
+        if (StringUtils.isNotBlank(replyTo)) {
             checkCommentUserExists(reqComment.getFeedId(), replyTo);
         }
 
@@ -62,18 +63,19 @@ public class CommentServiceImpl implements CommentService {
         comment.setCommentId(IdentifierUtils.uuid24());
         this.commentMapper.insertSelective(comment);
 
-        //TODO 修改
         List<String> receivers = this.getCommentNtfRecivers(feed);
-        receivers.add(feed.getUserId());
-        //TODO 完善
-        this.imHelper.publishCommentNtf(receivers);
+        CommentNotifyData commentNotifyData = new CommentNotifyData();
+        BeanUtils.copyProperties(comment, commentNotifyData);
+        commentNotifyData.setCreateDt(comment.getCreateDt().getTime());
+        this.imHelper.publishCommentNtf(receivers, commentNotifyData, MomentsCommentMsgType.COMMENTTYPE);
 
         RespCreateComment respCreateComment = new RespCreateComment();
         BeanUtils.copyProperties(comment, respCreateComment);
         return RestResult.success(respCreateComment);
     }
 
-    private List<String> getCommentNtfRecivers(Feed feed) {
+    @Override
+    public List<String> getCommentNtfRecivers(Feed feed) {
         List<String> receivers = this.commentMapper.getAllCommentAndLikeUserIds(feed.getFeedId());
         String feedOwner = feed.getUserId();
         if (!receivers.contains(feedOwner)) {
@@ -85,27 +87,26 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public void delComment(String feedId, String commentId) throws RestException {
         this.feedService.checkFeedExists(feedId);
-        Comment comment = this.commentMapper.selectByPrimaryKey(commentId);
+        Comment comment = this.commentMapper.selectByCommentId(commentId);
         if (Objects.isNull(comment) || !Objects.equals(comment.getFeedId(), feedId)) {
-            //TODO 提示错误码
-            throw new RestException(RestResult.generic(RestResultCode.ERR_FEED_NOT_EXISTED));
+            throw new RestException(RestResult.generic(RestResultCode.ERR_COMMENT_NOT_EXISTED));
         } else if (!Objects.equals(comment.getUserId(), UserHolder.getUid())) {
             throw new RestException(RestResult.generic(RestResultCode.ERR_FEED_NOT_EXISTED));
         }
-        this.commentMapper.deleteByPrimaryKey(commentId);
+        this.commentMapper.deleteByPrimaryKey(comment.getId());
     }
 
     @Override
     public RestResult getPagedComments(String feedId, Paged page) throws RestException {
         this.feedService.checkFeedExists(feedId);
-        if (StringUtils.isNotBlank(page.getFromId())) {
-            Comment comment = this.commentMapper.selectByPrimaryKey(page.getFromId());
+        if (StringUtils.isNotBlank(page.getFromUId())) {
+            Comment comment = this.commentMapper.selectByCommentId(page.getFromUId());
+            page.setFromId(comment.getId());
             if (Objects.isNull(comment)) {
                 throw new RestException(RestResult.generic(RestResultCode.ERR_FEED_NOT_EXISTED));
             }
         }
 
-        //TODO 查询语句？
         List<Comment> comments = this.commentMapper.selectPagedComment(page);
         List<RespComment> res = comments.stream().map(cm -> {
             RespComment respComment = new RespComment();

@@ -16,4 +16,6 @@ public class RespCreateComment {
     @JsonProperty("create_dt")
     private String createDt;
 
+    private String content;
+
 }

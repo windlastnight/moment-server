@@ -4,8 +4,12 @@ import lombok.Data;
 
 import java.util.Date;
 
+/**
+ * @author renchaoyang
+ * @date 2021/6/11
+ */
 @Data
-public class Comment {
+public class CommentNotifyData {
     private Long id;
 
     private String commentId;
@@ -18,6 +22,5 @@ public class Comment {
 
     private String replyTo;
 
-    private Date createDt;
-
+    private Long createDt;
 }

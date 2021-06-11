@@ -1,6 +1,5 @@
 package cn.rongcloud.moment.server.mapper;
 
-
 import cn.rongcloud.moment.server.model.Comment;
 import cn.rongcloud.moment.server.pojos.Paged;
 import org.apache.ibatis.annotations.Mapper;
@@ -10,13 +9,13 @@ import java.util.List;
 
 @Mapper
 public interface CommentMapper {
-    int deleteByPrimaryKey(String commentId);
+    int deleteByPrimaryKey(Long id);
 
     int insert(Comment record);
 
     int insertSelective(Comment record);
 
-    Comment selectByPrimaryKey(String commentId);
+    Comment selectByPrimaryKey(Long id);
 
     int updateByPrimaryKeySelective(Comment record);
 
@@ -27,4 +26,6 @@ public interface CommentMapper {
     List<Comment> selectPagedComment(Paged page);
 
     List<String> getAllCommentAndLikeUserIds(String feedId);
+
+    Comment selectByCommentId(String commentId);
 }

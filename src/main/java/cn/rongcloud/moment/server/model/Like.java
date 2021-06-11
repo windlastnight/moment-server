@@ -6,6 +6,8 @@ import java.util.Date;
 
 @Data
 public class Like {
+    private Long id;
+
     private String likeId;
 
     private String feedId;

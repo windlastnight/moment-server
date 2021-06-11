@@ -6,14 +6,15 @@ import cn.rongcloud.moment.server.common.rest.RestResult;
 import cn.rongcloud.moment.server.common.rest.RestResultCode;
 import cn.rongcloud.moment.server.common.utils.IdentifierUtils;
 import cn.rongcloud.moment.server.common.utils.UserHolder;
+import cn.rongcloud.moment.server.enums.MomentsCommentMsgType;
 import cn.rongcloud.moment.server.mapper.LikeMapper;
 import cn.rongcloud.moment.server.model.Feed;
 import cn.rongcloud.moment.server.model.Like;
+import cn.rongcloud.moment.server.model.LikeNotifyData;
 import cn.rongcloud.moment.server.pojos.Paged;
 import cn.rongcloud.moment.server.pojos.ReqLikeIt;
 import cn.rongcloud.moment.server.pojos.RespLike;
 import cn.rongcloud.moment.server.pojos.RespLikeIt;
-import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -42,6 +43,9 @@ public class LikeServiceImpl implements LikeService {
     @Resource
     IMHelper imHelper;
 
+    @Resource
+    CommentService commentService;
+
     @Override
     public RestResult likeIt(ReqLikeIt reqLike) throws RestException {
         String feedId = reqLike.getFeedId();
@@ -50,8 +54,12 @@ public class LikeServiceImpl implements LikeService {
         Like like = this.saveLike(feedId);
         RespLikeIt respLikeIt = new RespLikeIt();
         BeanUtils.copyProperties(like, respLikeIt);
-        List receivers = Lists.newArrayList(feed.getUserId());
-        this.imHelper.publishCommentNtf(receivers);
+        List<String> receivers = this.commentService.getCommentNtfRecivers(feed);
+
+        LikeNotifyData likeNotifyData = new LikeNotifyData();
+        BeanUtils.copyProperties(like, likeNotifyData);
+        likeNotifyData.setCreateDt(like.getCreateDt().getTime());
+        this.imHelper.publishCommentNtf(receivers, likeNotifyData, MomentsCommentMsgType.LIKETYPE);
 
         return RestResult.success(respLikeIt);
     }
@@ -73,20 +81,21 @@ public class LikeServiceImpl implements LikeService {
     public void unLikeIt(String feedId) throws RestException {
         this.feedService.checkFeedExists(feedId);
         Like like = this.getLikeByUser(feedId);
-        if (Objects.isNull(like)){
+        if (Objects.isNull(like)) {
             throw new RestException(RestResult.generic(RestResultCode.ERR_LIKE_USER_NO_LIKE));
         }
-        this.likeMapper.deleteByPrimaryKey(like.getLikeId());
+        this.likeMapper.deleteByPrimaryKey(like.getId());
     }
 
     @Override
     public RestResult getPagedLikes(String fid, Paged page) throws RestException {
 
         this.feedService.checkFeedExists(fid);
-        if (StringUtils.isNotBlank(page.getFromId())) {
+        if (StringUtils.isNotBlank(page.getFromUId())) {
             Like like = this.likeMapper.selectByPrimaryKey(page.getFromId());
+            page.setFromId(like.getId());
             if (Objects.isNull(like)) {
-                throw new RestException(RestResult.generic(RestResultCode.ERR_FEED_NOT_EXISTED));
+                throw new RestException(RestResult.generic(RestResultCode.ERR_LIKE_USER_NO_LIKE));
             }
         }
         List<Like> likes = this.likeMapper.selectPagedComment(page);

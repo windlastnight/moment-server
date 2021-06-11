@@ -2,37 +2,41 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.rongcloud.moment.server.mapper.CommentMapper">
   <resultMap id="BaseResultMap" type="cn.rongcloud.moment.server.model.Comment">
-    <id column="COMMENT_ID" jdbcType="VARCHAR" property="commentId" />
+    <id column="ID" jdbcType="BIGINT" property="id" />
+    <result column="COMMENT_ID" jdbcType="VARCHAR" property="commentId" />
     <result column="FEED_ID" jdbcType="VARCHAR" property="feedId" />
     <result column="USER_ID" jdbcType="VARCHAR" property="userId" />
     <result column="COMMENT_CONTENT" jdbcType="VARCHAR" property="commentContent" />
     <result column="REPLY_TO" jdbcType="VARCHAR" property="replyTo" />
-    <result column="CREATE_DT" jdbcType="TIMESTAMP" property="createDt" />
+    <result column="CREATE_DT" jdbcType="DATE" property="createDt" />
   </resultMap>
   <sql id="Base_Column_List">
-    COMMENT_ID, FEED_ID, USER_ID, COMMENT_CONTENT, REPLY_TO, CREATE_DT
+    ID, COMMENT_ID, FEED_ID, USER_ID, COMMENT_CONTENT, REPLY_TO, CREATE_DT
   </sql>
-  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
     select 
     <include refid="Base_Column_List" />
     from T_COMMENT
-    where COMMENT_ID = #{commentId,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=BIGINT}
   </select>
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
     delete from T_COMMENT
-    where COMMENT_ID = #{commentId,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=BIGINT}
   </delete>
   <insert id="insert" parameterType="cn.rongcloud.moment.server.model.Comment">
-    insert into T_COMMENT (COMMENT_ID, FEED_ID, USER_ID, 
-      COMMENT_CONTENT, REPLY_TO, CREATE_DT
-      )
-    values (#{commentId,jdbcType=VARCHAR}, #{feedId,jdbcType=VARCHAR}, #{userId,jdbcType=VARCHAR}, 
-      #{commentContent,jdbcType=VARCHAR}, #{replyTo,jdbcType=VARCHAR}, #{createDt,jdbcType=TIMESTAMP}
-      )
+    insert into T_COMMENT (ID, COMMENT_ID, FEED_ID, 
+      USER_ID, COMMENT_CONTENT, REPLY_TO, 
+      CREATE_DT)
+    values (#{id,jdbcType=BIGINT}, #{commentId,jdbcType=VARCHAR}, #{feedId,jdbcType=VARCHAR}, 
+      #{userId,jdbcType=VARCHAR}, #{commentContent,jdbcType=VARCHAR}, #{replyTo,jdbcType=VARCHAR}, 
+      #{createDt,jdbcType=DATE})
   </insert>
   <insert id="insertSelective" parameterType="cn.rongcloud.moment.server.model.Comment">
     insert into T_COMMENT
     <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        ID,
+      </if>
       <if test="commentId != null">
         COMMENT_ID,
       </if>
@@ -53,6 +57,9 @@
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
       <if test="commentId != null">
         #{commentId,jdbcType=VARCHAR},
       </if>
@@ -69,13 +76,16 @@
         #{replyTo,jdbcType=VARCHAR},
       </if>
       <if test="createDt != null">
-        #{createDt,jdbcType=TIMESTAMP},
+        #{createDt,jdbcType=DATE},
       </if>
     </trim>
   </insert>
   <update id="updateByPrimaryKeySelective" parameterType="cn.rongcloud.moment.server.model.Comment">
     update T_COMMENT
     <set>
+      <if test="commentId != null">
+        COMMENT_ID = #{commentId,jdbcType=VARCHAR},
+      </if>
       <if test="feedId != null">
         FEED_ID = #{feedId,jdbcType=VARCHAR},
       </if>
@@ -89,19 +99,20 @@
         REPLY_TO = #{replyTo,jdbcType=VARCHAR},
       </if>
       <if test="createDt != null">
-        CREATE_DT = #{createDt,jdbcType=TIMESTAMP},
+        CREATE_DT = #{createDt,jdbcType=DATE},
       </if>
     </set>
-    where COMMENT_ID = #{commentId,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=BIGINT}
   </update>
   <update id="updateByPrimaryKey" parameterType="cn.rongcloud.moment.server.model.Comment">
     update T_COMMENT
-    set FEED_ID = #{feedId,jdbcType=VARCHAR},
+    set COMMENT_ID = #{commentId,jdbcType=VARCHAR},
+      FEED_ID = #{feedId,jdbcType=VARCHAR},
       USER_ID = #{userId,jdbcType=VARCHAR},
       COMMENT_CONTENT = #{commentContent,jdbcType=VARCHAR},
       REPLY_TO = #{replyTo,jdbcType=VARCHAR},
-      CREATE_DT = #{createDt,jdbcType=TIMESTAMP}
-    where COMMENT_ID = #{commentId,jdbcType=VARCHAR}
+      CREATE_DT = #{createDt,jdbcType=DATE}
+    where ID = #{id,jdbcType=BIGINT}
   </update>
 
   <select id="selectLastUserCommet" resultMap="BaseResultMap">
@@ -117,7 +128,7 @@
     from T_COMMENT where
     1=1
     <if test="fromId != null and fromId != ''">
-      and  COMMENT_ID=#{fromId}
+      and  ID &gt; #{fromId}
     </if>
     limit #{size}
   </select>
@@ -126,10 +137,16 @@
     select distinct USER_ID
     from (
                  select USER_ID
-                 from T_COMMENT
+                 from T_COMMENT where feed_id=#{value}
                  union all
                  select USER_ID
-                 from T_LIKE
+                 from T_LIKE where feed_id=#{value}
                  ) as tmp
+  </select>
+  <select id="selectByCommentId" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from T_COMMENT
+    where COMMENT_ID = #{id}
   </select>
 </mapper>

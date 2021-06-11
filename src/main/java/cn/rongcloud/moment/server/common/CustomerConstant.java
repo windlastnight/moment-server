@@ -9,4 +9,6 @@ public class CustomerConstant {
 
     public static final String SERVICE_NAME = "moment";
     public static final String SYSTEM_ID = "GW52msQU5bsQnza2fd0kpkH";
+    public static final Integer DEF_PAGE_SIZE = 20;
+
 }
