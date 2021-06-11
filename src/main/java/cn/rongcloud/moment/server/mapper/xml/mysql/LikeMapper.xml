@@ -102,11 +102,11 @@
     select
     <include refid="Base_Column_List"/>
     from T_LIKE where
-    1=1
-    <if test="fromId != null and fromId != ''">
-      and LIKE_ID &gt; #{fromId}
+    FEED_ID=#{feedId}
+    <if test="page.fromId != null and page.fromId != ''">
+      and  ID gt; #{page.fromId}
     </if>
-     limit #{size}
+    limit #{page.size}
   </select>
 
   <select id="selectByLikeId" parameterType="java.lang.String" resultMap="BaseResultMap">

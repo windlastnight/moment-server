@@ -23,7 +23,7 @@ public interface CommentMapper {
 
     Comment selectLastUserCommet(@Param("feedId") String feedId, @Param("userId") String uid);
 
-    List<Comment> selectPagedComment(Paged page);
+    List<Comment> selectPagedComment(@Param("feedId") String feedId, @Param("page") Paged page);
 
     List<String> getAllCommentAndLikeUserIds(String feedId);
 

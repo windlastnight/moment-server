@@ -98,7 +98,7 @@ public class LikeServiceImpl implements LikeService {
                 throw new RestException(RestResult.generic(RestResultCode.ERR_LIKE_USER_NO_LIKE));
             }
         }
-        List<Like> likes = this.likeMapper.selectPagedComment(page);
+        List<Like> likes = this.likeMapper.selectPagedComment(fid, page);
         List<RespLike> res = likes.stream().map(cm -> {
             RespLike respLike = new RespLike();
             BeanUtils.copyProperties(cm, respLike);

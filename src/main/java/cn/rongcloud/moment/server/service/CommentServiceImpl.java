@@ -107,7 +107,7 @@ public class CommentServiceImpl implements CommentService {
             }
         }
 
-        List<Comment> comments = this.commentMapper.selectPagedComment(page);
+        List<Comment> comments = this.commentMapper.selectPagedComment(feedId, page);
         List<RespComment> res = comments.stream().map(cm -> {
             RespComment respComment = new RespComment();
             BeanUtils.copyProperties(cm, respComment);
