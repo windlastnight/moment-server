@@ -20,5 +20,5 @@ public interface CommentService {
 
     RestResult getPagedComments(String feedId, Paged page) throws RestException;
 
-    List<String> getCommentNtfRecivers(Feed feed);
+    List<String> getCommentNtfReceivers(Feed feed);
 }

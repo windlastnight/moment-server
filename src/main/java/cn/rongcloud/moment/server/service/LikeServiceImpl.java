@@ -54,7 +54,7 @@ public class LikeServiceImpl implements LikeService {
         Like like = this.saveLike(feedId);
         RespLikeIt respLikeIt = new RespLikeIt();
         BeanUtils.copyProperties(like, respLikeIt);
-        List<String> receivers = this.commentService.getCommentNtfRecivers(feed);
+        List<String> receivers = this.commentService.getCommentNtfReceivers(feed);
 
         LikeNotifyData likeNotifyData = new LikeNotifyData();
         BeanUtils.copyProperties(like, likeNotifyData);
@@ -73,8 +73,7 @@ public class LikeServiceImpl implements LikeService {
     }
 
     private Like getLikeByUser(String feedId) {
-        Like like = this.likeMapper.selectByFeedIdAndUserId(feedId, UserHolder.getUid());
-        return like;
+        return this.likeMapper.selectByFeedIdAndUserId(feedId, UserHolder.getUid());
     }
 
     @Override
@@ -93,9 +92,10 @@ public class LikeServiceImpl implements LikeService {
         this.feedService.checkFeedExists(fid);
         if (StringUtils.isNotBlank(page.getFromUId())) {
             Like like = this.likeMapper.selectByPrimaryKey(page.getFromId());
-            page.setFromId(like.getId());
             if (Objects.isNull(like)) {
                 throw new RestException(RestResult.generic(RestResultCode.ERR_LIKE_USER_NO_LIKE));
+            }else{
+                page.setFromId(like.getId());
             }
         }
         List<Like> likes = this.likeMapper.selectPagedComment(fid, page);

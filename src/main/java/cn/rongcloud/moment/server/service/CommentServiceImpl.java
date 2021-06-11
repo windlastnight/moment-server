@@ -47,9 +47,9 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public RestResult comment(ReqCreateComment reqComment) throws RestException {
-//        1.检查feedid是否有效
+//        1.检查feedId是否有效
         Feed feed = this.feedService.checkFeedExists(reqComment.getFeedId());
-//        2.检查replyto是否有效TApplicationTypeMapper.xml
+//        2.检查replyTo是否有效TApplicationTypeMapper.xml
 
         String replyTo = reqComment.getReplyTo();
         if (StringUtils.isNotBlank(replyTo)) {
@@ -63,7 +63,7 @@ public class CommentServiceImpl implements CommentService {
         comment.setCommentId(IdentifierUtils.uuid24());
         this.commentMapper.insertSelective(comment);
 
-        List<String> receivers = this.getCommentNtfRecivers(feed);
+        List<String> receivers = this.getCommentNtfReceivers(feed);
         CommentNotifyData commentNotifyData = new CommentNotifyData();
         BeanUtils.copyProperties(comment, commentNotifyData);
         commentNotifyData.setCreateDt(comment.getCreateDt().getTime());
@@ -75,7 +75,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public List<String> getCommentNtfRecivers(Feed feed) {
+    public List<String> getCommentNtfReceivers(Feed feed) {
         List<String> receivers = this.commentMapper.getAllCommentAndLikeUserIds(feed.getFeedId());
         String feedOwner = feed.getUserId();
         if (!receivers.contains(feedOwner)) {
@@ -101,9 +101,10 @@ public class CommentServiceImpl implements CommentService {
         this.feedService.checkFeedExists(feedId);
         if (StringUtils.isNotBlank(page.getFromUId())) {
             Comment comment = this.commentMapper.selectByCommentId(page.getFromUId());
-            page.setFromId(comment.getId());
             if (Objects.isNull(comment)) {
                 throw new RestException(RestResult.generic(RestResultCode.ERR_FEED_NOT_EXISTED));
+            }else {
+                page.setFromId(comment.getId());
             }
         }
 
