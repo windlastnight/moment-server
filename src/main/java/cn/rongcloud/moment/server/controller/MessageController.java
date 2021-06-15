@@ -27,4 +27,10 @@ public class MessageController {
         return messageService.getUnread();
     }
 
+    @GetMapping("/history")
+    public RestResult getHistory(@RequestParam(value = "from_message_id", required = false) String fromMessageId, @RequestParam(value = "size", defaultValue = "20") Integer size) {
+        log.info("get history message, operator:{}, fromMessageId:{}, size:{}", UserHolder.getUid(), fromMessageId, size);
+        return messageService.getHistory(fromMessageId, size);
+    }
+
 }

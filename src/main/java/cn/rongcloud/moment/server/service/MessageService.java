@@ -10,4 +10,5 @@ public interface MessageService {
     void saveMessage(Message message);
     RestResult getUnreadCount();
     RestResult getUnread();
+    RestResult getHistory(String fromMessageId, Integer size);
 }

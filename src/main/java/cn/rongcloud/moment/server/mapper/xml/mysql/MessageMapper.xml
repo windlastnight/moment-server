@@ -14,7 +14,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="status" column="STATUS"/>
     </resultMap>
 
-    <sql id="selectTFeedVo">
+    <sql id="selectTMessageVo">
         SELECT ID, MESSAGE_ID, FEED_ID, USER_ID, MESSAGE_TYPE, CREATE_DT, STATUS FROM T_MESSAGE
     </sql>
 
@@ -37,5 +37,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{status},
         </trim>
     </insert>
+
+    <select id="getMessage" resultMap="messageResult">
+        <include refid="selectTMessageVo"/>
+        WHERE MESSAGE_ID = #{messageId}
+    </select>
+
+    <select id="getMessageByPage" resultMap="messageResult">
+        <include refid="selectTMessageVo"/>
+        WHERE USER_ID = #{userId}
+        <if test="fromMessageAutoIncId != null"> AND ID &lt; #{fromTimelineAutoIncId} </if>
+        ORDER BY ID DESC LIMIT #{size}
+    </select>
 
 </mapper>

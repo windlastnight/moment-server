@@ -4,16 +4,17 @@ package cn.rongcloud.moment.server.service;
 import cn.rongcloud.moment.server.common.redis.RedisKey;
 import cn.rongcloud.moment.server.common.redis.RedisOptService;
 import cn.rongcloud.moment.server.common.rest.RestResult;
+import cn.rongcloud.moment.server.common.rest.RestResultCode;
 import cn.rongcloud.moment.server.common.utils.UserHolder;
 import cn.rongcloud.moment.server.enums.MessageStatus;
 import cn.rongcloud.moment.server.enums.MomentsCommentType;
 import cn.rongcloud.moment.server.mapper.MessageMapper;
 import cn.rongcloud.moment.server.model.Comment;
-import cn.rongcloud.moment.server.model.Like;
 import cn.rongcloud.moment.server.model.Message;
 import cn.rongcloud.moment.server.pojos.RespMessageInfo;
 import cn.rongcloud.moment.server.pojos.RespMessageUnreadCount;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -58,19 +59,46 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public RestResult getUnread() {
-        List<RespMessageInfo> resp = new ArrayList<>();
 
         List<Message> messages = (List<Message>) optService.zReverseRangeByScore(RedisKey.getUserUnreadMessageKey(UserHolder.getUid()), 0, -1);
+
+        List<RespMessageInfo> resp = buildRespMessage(messages);
+
+        return RestResult.success(resp);
+    }
+
+    @Override
+    public RestResult getHistory(String fromMessageId, Integer size) {
+
+        Long fromMessageAutoIncId = null;
+        if (!StringUtils.isEmpty(fromMessageId)) {
+            Message message = messageMapper.getMessage(fromMessageId);
+            if (message == null) {
+                return RestResult.generic(RestResultCode.ERR_MESSAGE_NOT_EXISTED);
+            }
+            fromMessageAutoIncId = message.getId();
+        }
+
+        List<Message> messages = messageMapper.getMessageByPage(UserHolder.getUid(), fromMessageAutoIncId, size);
+        List<RespMessageInfo> resp = buildRespMessage(messages);
+
+        return RestResult.success(resp);
+    }
+
+    private List<RespMessageInfo> buildRespMessage(List<Message> messages) {
+
+        List<RespMessageInfo> resp = new ArrayList<>();
+
         if (messages == null || messages.isEmpty()) {
-            return RestResult.success(resp);
+            return resp;
         }
 
         Map<String, Comment> commentMap = new HashMap<>();
         List<String> commentIds = new ArrayList<>();
         for (Message message: messages) {
-           if (message.getMessageType() == MomentsCommentType.COMMENT.getType()) {
-               commentIds.add(message.getMessageId());
-           }
+            if (message.getMessageType() == MomentsCommentType.COMMENT.getType()) {
+                commentIds.add(message.getMessageId());
+            }
         }
         if (!commentIds.isEmpty()) {
             List<Comment> comments = commentService.batchGetComment(commentIds);
@@ -94,7 +122,6 @@ public class MessageServiceImpl implements MessageService {
             }
             resp.add(respMessageInfo);
         }
-
-        return RestResult.success(resp);
+        return resp;
     }
 }
