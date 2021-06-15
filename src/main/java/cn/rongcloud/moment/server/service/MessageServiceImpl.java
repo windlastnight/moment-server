@@ -61,7 +61,7 @@ public class MessageServiceImpl implements MessageService {
     public RestResult getUnread() {
 
         List<Message> messages = (List<Message>) optService.zReverseRangeByScore(RedisKey.getUserUnreadMessageKey(UserHolder.getUid()), 0, -1);
-
+        optService.deleteKey(RedisKey.getUserUnreadMessageKey(UserHolder.getUid()));
         List<RespMessageInfo> resp = buildRespMessage(messages);
 
         return RestResult.success(resp);
