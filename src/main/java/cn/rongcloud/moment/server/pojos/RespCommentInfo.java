@@ -3,6 +3,8 @@ package cn.rongcloud.moment.server.pojos;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
+import java.util.Date;
+
 @Data
 public class RespCommentInfo {
 
@@ -22,5 +24,5 @@ public class RespCommentInfo {
     private String content;
 
     @JsonProperty("create_dt")
-    private String createDt;
+    private Date createDt;
 }
