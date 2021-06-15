@@ -8,6 +8,7 @@ import cn.rongcloud.moment.server.common.utils.IdentifierUtils;
 import cn.rongcloud.moment.server.common.utils.UserHolder;
 import cn.rongcloud.moment.server.enums.MomentsCommentMsgType;
 import cn.rongcloud.moment.server.mapper.LikeMapper;
+import cn.rongcloud.moment.server.model.Comment;
 import cn.rongcloud.moment.server.model.Feed;
 import cn.rongcloud.moment.server.model.Like;
 import cn.rongcloud.moment.server.model.LikeNotifyData;
@@ -90,21 +91,28 @@ public class LikeServiceImpl implements LikeService {
     public RestResult getPagedLikes(String fid, Paged page) throws RestException {
 
         this.feedService.checkFeedExists(fid);
-        if (StringUtils.isNotBlank(page.getFromUId())) {
-            Like like = this.likeMapper.selectByPrimaryKey(page.getFromId());
-            if (Objects.isNull(like)) {
-                throw new RestException(RestResult.generic(RestResultCode.ERR_LIKE_USER_NO_LIKE));
-            }else{
-                page.setFromId(like.getId());
-            }
-        }
-        List<Like> likes = this.likeMapper.selectPagedComment(fid, page);
+
+        List<Like> likes = getLikes(fid, page.getFromUId(), page.getSize());
+
         List<RespLike> res = likes.stream().map(cm -> {
             RespLike respLike = new RespLike();
             BeanUtils.copyProperties(cm, respLike);
             return respLike;
         }).collect(Collectors.toList());
         return RestResult.success(res);
+    }
+
+    @Override
+    public List<Like> getLikes(String feedId, String fromLikeId, int size) {
+        Long fromAutoIncLikeId = null;
+        if (StringUtils.isNotBlank(fromLikeId)) {
+            Like like = likeMapper.selectByLikeId(fromLikeId);
+            if (Objects.isNull(like)) {
+                throw new RestException(RestResult.generic(RestResultCode.ERR_LIKE_USER_NO_LIKE));
+            }
+            fromAutoIncLikeId = like.getId();
+        }
+        return this.likeMapper.selectPagedLike(feedId, fromAutoIncLikeId, size);
     }
 
     private Like saveLike(String feedId) {

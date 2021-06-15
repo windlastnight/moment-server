@@ -24,7 +24,7 @@ public interface LikeMapper {
 
     Like selectByFeedIdAndUserId(@Param("feedId") String feedId, @Param("userId") String uid);
 
-    List<Like> selectPagedComment(@Param("feedId") String feedId, @Param("page") Paged page);
+    List<Like> selectPagedLike(@Param("feedId") String feedId, @Param("fromLikeId") Long page, @Param("size") Integer size);
 
-    Like selectByLikeId(String commentId);
+    Like selectByLikeId(String likeId);
 }

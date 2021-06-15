@@ -98,15 +98,15 @@
     and USER_ID = #{userId} limit 1
   </select>
 
-  <select id="selectPagedComment" resultMap="BaseResultMap">
+  <select id="selectPagedLike" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List"/>
     from T_LIKE where
     FEED_ID=#{feedId}
-    <if test="page.fromId != null and page.fromId != ''">
-      and  ID &gt; #{page.fromId}
+    <if test="fromLikeId != null and fromLikeId != ''">
+      and  ID &gt; #{fromLikeId}
     </if>
-    limit #{page.size}
+    limit #{size}
   </select>
 
   <select id="selectByLikeId" parameterType="java.lang.String" resultMap="BaseResultMap">

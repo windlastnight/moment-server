@@ -126,11 +126,11 @@
     select
     <include refid="Base_Column_List"/>
     from T_COMMENT where
-    FEED_ID=#{feedId}
-    <if test="page.fromId != null and page.fromId != ''">
-      and  ID &gt; #{page.fromId}
+    FEED_ID = #{feedId}
+    <if test="fromAutoIncCommentId != null and fromAutoIncCommentId != ''">
+      and  ID &gt; #{fromAutoIncCommentId}
     </if>
-    limit #{page.size}
+    limit #{size}
   </select>
 
   <select id="getAllCommentAndLikeUserIds" resultType="java.lang.String">

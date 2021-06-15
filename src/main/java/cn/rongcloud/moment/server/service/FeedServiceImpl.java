@@ -11,14 +11,13 @@ import cn.rongcloud.moment.server.common.utils.UserHolder;
 import cn.rongcloud.moment.server.enums.FeedStatus;
 import cn.rongcloud.moment.server.mapper.FeedMapper;
 import cn.rongcloud.moment.server.mapper.TimelineMapper;
+import cn.rongcloud.moment.server.model.Comment;
 import cn.rongcloud.moment.server.model.Feed;
+import cn.rongcloud.moment.server.model.Like;
 import cn.rongcloud.moment.server.model.Timeline;
-import cn.rongcloud.moment.server.pojos.ReqFeedPublish;
+import cn.rongcloud.moment.server.pojos.*;
 import cn.rongcloud.moment.server.common.rce.RceHelper;
 import cn.rongcloud.moment.server.common.rce.RceRespResult;
-import cn.rongcloud.moment.server.pojos.RespFeedInfo;
-import cn.rongcloud.moment.server.pojos.RespFeedPublish;
-import cn.rongcloud.moment.server.pojos.RespGetNewFeed;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +46,12 @@ public class FeedServiceImpl implements FeedService {
 
     @Autowired
     RedisOptService redisOptService;
+
+    @Autowired
+    CommentService commentService;
+
+    @Autowired
+    LikeService likeService;
 
     @Value("${moment.system_manager_id}")
     private String systemManagerId;
@@ -107,9 +112,7 @@ public class FeedServiceImpl implements FeedService {
             return RestResult.generic(RestResultCode.ERR_FEED_NOT_EXISTED);
         }
         //TODO 校验用户是否有权限查看 Feed
-        //TODO 获取前 50 条点赞
-        //TODO 获取前 50 条评论
-        RespFeedInfo resp = bulid(feed);
+        RespFeedInfo resp = build(feed);
         return RestResult.success(resp);
     }
 
@@ -117,19 +120,19 @@ public class FeedServiceImpl implements FeedService {
     public RestResult batchGetFeedInfo(String userId, List<String> feedIds) {
 
         List<RespFeedInfo> result = new ArrayList<>();
+        if (feedIds == null || feedIds.isEmpty()) {
+            return RestResult.success(result);
+        }
 
         List<Feed> feeds = feedMapper.getFeedsByIds(feedIds);
         if (feeds != null && !feeds.isEmpty()) {
             for (Feed feed: feeds) {
-                RespFeedInfo resp = bulid(feed);
+                RespFeedInfo resp = build(feed);
                 result.add(resp);
             }
         }
 
         //TODO 校验用户是否有权限查看 Feed
-        //TODO 获取前 50 条点赞
-        //TODO 获取前 50 条评论
-
         return RestResult.success(result);
     }
 
@@ -167,7 +170,7 @@ public class FeedServiceImpl implements FeedService {
         return feed;
     }
 
-    private RespFeedInfo bulid(Feed feed){
+    private RespFeedInfo build(Feed feed){
         RespFeedInfo resp = new RespFeedInfo();
         resp.setFeedId(feed.getFeedId());
         resp.setUserId(feed.getUserId());
@@ -176,6 +179,33 @@ public class FeedServiceImpl implements FeedService {
         resp.setFeedStatus(feed.getFeedStatus());
         resp.setCreateDt(feed.getCreateDt());
         resp.setUpdateDt(feed.getUpdateDt());
+
+        List<RespCommentInfo> respCommentInfoList = new ArrayList<>();
+        List<Comment> comments = commentService.getComments(feed.getFeedId(), null, 20);
+        if (comments != null && !comments.isEmpty()){
+            for (Comment comment: comments) {
+                RespCommentInfo respCommentInfo = new RespCommentInfo();
+                respCommentInfo.setCommentId(comment.getCommentId());
+                respCommentInfo.setContent(comment.getCommentContent());
+                respCommentInfo.setUserId(comment.getUserId());
+                respCommentInfoList.add(respCommentInfo);
+            }
+        }
+        resp.setComments(respCommentInfoList);
+
+        List<RespLikeInfo> respLikeInfoList = new ArrayList<>();
+        List<Like> likes = likeService.getLikes(feed.getFeedId(), null, 20);
+        if (likes != null && !likes.isEmpty()) {
+            for (Like like: likes) {
+                RespLikeInfo respLikeInfo = new RespLikeInfo();
+                respLikeInfo.setLikeId(like.getLikeId());
+                respLikeInfo.setUserId(like.getUserId());
+                respLikeInfo.setCreateDt(like.getCreateDt());
+                respLikeInfoList.add(respLikeInfo);
+            }
+        }
+        resp.setLikes(respLikeInfoList);
+
         return resp;
     }
 

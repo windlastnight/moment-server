@@ -1,7 +1,7 @@
 package cn.rongcloud.moment.server.service;
 
-import cn.rongcloud.moment.server.common.rest.RestException;
 import cn.rongcloud.moment.server.common.rest.RestResult;
+import cn.rongcloud.moment.server.model.Comment;
 import cn.rongcloud.moment.server.model.Feed;
 import cn.rongcloud.moment.server.pojos.Paged;
 import cn.rongcloud.moment.server.pojos.ReqCreateComment;
@@ -14,11 +14,13 @@ import java.util.List;
  */
 public interface CommentService {
 
-    RestResult comment(ReqCreateComment comment) throws RestException;
+    RestResult comment(ReqCreateComment comment);
 
-    void delComment(String feedId, String commentId) throws RestException;
+    void delComment(String feedId, String commentId);
 
-    RestResult getPagedComments(String feedId, Paged page) throws RestException;
+    RestResult getPagedComments(String feedId, Paged page);
+
+    List<Comment> getComments(String feedId, String fromCommentId, int size);
 
     List<String> getCommentNtfReceivers(Feed feed);
 }

@@ -46,10 +46,10 @@ public class CommentServiceImpl implements CommentService {
     IMHelper imHelper;
 
     @Override
-    public RestResult comment(ReqCreateComment reqComment) throws RestException {
-//        1.检查feedId是否有效
+    public RestResult comment(ReqCreateComment reqComment) {
+//        1.检查feedid是否有效
         Feed feed = this.feedService.checkFeedExists(reqComment.getFeedId());
-//        2.检查replyTo是否有效TApplicationTypeMapper.xml
+//        2.检查replyto是否有效TApplicationTypeMapper.xml
 
         String replyTo = reqComment.getReplyTo();
         if (StringUtils.isNotBlank(replyTo)) {
@@ -85,7 +85,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public void delComment(String feedId, String commentId) throws RestException {
+    public void delComment(String feedId, String commentId) {
         this.feedService.checkFeedExists(feedId);
         Comment comment = this.commentMapper.selectByCommentId(commentId);
         if (Objects.isNull(comment) || !Objects.equals(comment.getFeedId(), feedId)) {
@@ -97,18 +97,9 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public RestResult getPagedComments(String feedId, Paged page) throws RestException {
+    public RestResult getPagedComments(String feedId, Paged page) {
         this.feedService.checkFeedExists(feedId);
-        if (StringUtils.isNotBlank(page.getFromUId())) {
-            Comment comment = this.commentMapper.selectByCommentId(page.getFromUId());
-            if (Objects.isNull(comment)) {
-                throw new RestException(RestResult.generic(RestResultCode.ERR_FEED_NOT_EXISTED));
-            }else {
-                page.setFromId(comment.getId());
-            }
-        }
-
-        List<Comment> comments = this.commentMapper.selectPagedComment(feedId, page);
+        List<Comment> comments = getComments(feedId, page.getFromUId(), page.getSize());
         List<RespComment> res = comments.stream().map(cm -> {
             RespComment respComment = new RespComment();
             BeanUtils.copyProperties(cm, respComment);
@@ -117,7 +108,20 @@ public class CommentServiceImpl implements CommentService {
         return RestResult.success(res);
     }
 
-    private void checkCommentUserExists(String feedId, String userId) throws RestException {
+    @Override
+    public List<Comment> getComments(String feedId, String fromCommentId, int size) {
+        Long fromAutoIncCommentId = null;
+        if (StringUtils.isNotBlank(fromCommentId)) {
+            Comment comment = commentMapper.selectByCommentId(fromCommentId);
+            if (Objects.isNull(comment)) {
+                throw new RestException(RestResult.generic(RestResultCode.ERR_COMMENT_NOT_EXISTED));
+            }
+            fromAutoIncCommentId = comment.getId();
+        }
+        return this.commentMapper.selectPagedComment(feedId, fromAutoIncCommentId, size);
+    }
+
+    private void checkCommentUserExists(String feedId, String userId) {
         Comment comment = this.commentMapper.selectLastUserCommet(feedId, userId);
         if (Objects.isNull(comment)) {
             throw new RestException(RestResult.generic(RestResultCode.ERR_FEED_NOT_EXISTED));
