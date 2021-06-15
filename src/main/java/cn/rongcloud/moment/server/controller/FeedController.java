@@ -3,7 +3,7 @@ package cn.rongcloud.moment.server.controller;
 import cn.rongcloud.moment.server.common.rest.RestResult;
 import cn.rongcloud.moment.server.common.utils.GsonUtil;
 import cn.rongcloud.moment.server.common.utils.UserHolder;
-import cn.rongcloud.moment.server.pojos.RepIds;
+import cn.rongcloud.moment.server.pojos.ReqIds;
 import cn.rongcloud.moment.server.pojos.ReqFeedPublish;
 import cn.rongcloud.moment.server.service.FeedService;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +42,7 @@ public class FeedController {
     }
 
     @PostMapping("/batch")
-    public RestResult batchGetFeedInfo(@RequestBody RepIds data) {
+    public RestResult batchGetFeedInfo(@RequestBody ReqIds data) {
         log.info("batch get feed, operator:{}, data:{}", UserHolder.getUid(), GsonUtil.toJson(data));
         return feedService.batchGetFeedInfo(UserHolder.getUid(), data.getIds());
     }

@@ -5,6 +5,6 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class RepIds {
+public class ReqIds {
     private List<String> ids;
 }

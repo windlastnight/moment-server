@@ -50,4 +50,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         ORDER BY ID DESC LIMIT #{size}
     </select>
 
+    <delete id="batchDelete">
+        DELETE FROM T_MESSAGE WHERE USER_ID = #{userId}
+        AND MESSAGE_ID IN
+        <foreach item="messageId" collection="messageIds" open="(" separator="," close=")">
+            #{messageId}
+        </foreach>
+    </delete>
+
+    <delete id="deleteAll">
+        DELETE FROM T_MESSAGE WHERE USER_ID = #{userId}
+    </delete>
+
 </mapper>

@@ -15,4 +15,8 @@ public interface MessageMapper {
 
     List<Message> getMessageByPage(@Param("userId") String userId, @Param("fromMessageAutoIncId") Long fromMessageAutoIncId, @Param("size") Integer size);
 
+    void batchDelete(@Param("userId") String userId, @Param("messageIds") List<String> messageIds);
+
+    void deleteAll(@Param("userId") String userId);
+
 }

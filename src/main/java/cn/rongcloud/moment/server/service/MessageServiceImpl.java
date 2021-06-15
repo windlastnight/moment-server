@@ -85,6 +85,21 @@ public class MessageServiceImpl implements MessageService {
         return RestResult.success(resp);
     }
 
+    @Override
+    public RestResult batchDelete(List<String> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return RestResult.success();
+        }
+        messageMapper.batchDelete(UserHolder.getUid(), ids);
+        return RestResult.success();
+    }
+
+    @Override
+    public RestResult deleteAll() {
+        messageMapper.deleteAll(UserHolder.getUid());
+        return RestResult.success();
+    }
+
     private List<RespMessageInfo> buildRespMessage(List<Message> messages) {
 
         List<RespMessageInfo> resp = new ArrayList<>();

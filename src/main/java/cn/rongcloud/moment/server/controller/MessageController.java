@@ -1,7 +1,9 @@
 package cn.rongcloud.moment.server.controller;
 
 import cn.rongcloud.moment.server.common.rest.RestResult;
+import cn.rongcloud.moment.server.common.utils.GsonUtil;
 import cn.rongcloud.moment.server.common.utils.UserHolder;
+import cn.rongcloud.moment.server.pojos.ReqIds;
 import cn.rongcloud.moment.server.service.MessageService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,18 @@ public class MessageController {
     public RestResult getHistory(@RequestParam(value = "from_message_id", required = false) String fromMessageId, @RequestParam(value = "size", defaultValue = "20") Integer size) {
         log.info("get history message, operator:{}, fromMessageId:{}, size:{}", UserHolder.getUid(), fromMessageId, size);
         return messageService.getHistory(fromMessageId, size);
+    }
+
+    @DeleteMapping("/batch")
+    public RestResult batchDelete(@RequestBody ReqIds data) {
+        log.info("batch delete message, operator:{}, data:{}", UserHolder.getUid(), GsonUtil.toJson(data));
+        return messageService.batchDelete(data.getIds());
+    }
+
+    @DeleteMapping("/all")
+    public RestResult deleteAll() {
+        log.info("delete all message, operator:{}", UserHolder.getUid());
+        return messageService.deleteAll();
     }
 
 }
