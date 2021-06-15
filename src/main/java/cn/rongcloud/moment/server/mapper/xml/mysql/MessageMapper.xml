@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.rongcloud.moment.server.mapper.MessageMapper">
+
+    <resultMap type="cn.rongcloud.moment.server.model.Message" id="messageResult">
+        <result property="id" column="ID"/>
+        <result property="messageId" column="MESSAGE_ID"/>
+        <result property="feedId" column="FEED_ID"/>
+        <result property="userId" column="USER_ID"/>
+        <result property="messageType" column="MESSAGE_TYPE"/>
+        <result property="createDt" column="CREATE_DT"/>
+        <result property="status" column="STATUS"/>
+    </resultMap>
+
+    <sql id="selectTFeedVo">
+        SELECT ID, MESSAGE_ID, FEED_ID, USER_ID, MESSAGE_TYPE, CREATE_DT, STATUS FROM T_MESSAGE
+    </sql>
+
+    <insert id="insertMessage" parameterType="cn.rongcloud.moment.server.model.Message" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO T_MESSAGE
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            MESSAGE_ID,
+            FEED_ID,
+            USER_ID,
+            MESSAGE_TYPE,
+            CREATE_DT,
+            STATUS
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            #{messageId},
+            #{feedId},
+            #{userId},
+            #{messageType},
+            #{createDt},
+            #{status},
+        </trim>
+    </insert>
+
+</mapper>

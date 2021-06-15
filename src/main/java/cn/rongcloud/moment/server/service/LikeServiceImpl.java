@@ -1,17 +1,21 @@
 package cn.rongcloud.moment.server.service;
 
 import cn.rongcloud.moment.server.common.im.IMHelper;
+import cn.rongcloud.moment.server.common.redis.RedisKey;
+import cn.rongcloud.moment.server.common.redis.RedisOptService;
 import cn.rongcloud.moment.server.common.rest.RestException;
 import cn.rongcloud.moment.server.common.rest.RestResult;
 import cn.rongcloud.moment.server.common.rest.RestResultCode;
+import cn.rongcloud.moment.server.common.utils.DateTimeUtils;
 import cn.rongcloud.moment.server.common.utils.IdentifierUtils;
 import cn.rongcloud.moment.server.common.utils.UserHolder;
-import cn.rongcloud.moment.server.enums.MomentsCommentMsgType;
+import cn.rongcloud.moment.server.enums.MessageStatus;
+import cn.rongcloud.moment.server.enums.MomentsCommentType;
 import cn.rongcloud.moment.server.mapper.LikeMapper;
-import cn.rongcloud.moment.server.model.Comment;
 import cn.rongcloud.moment.server.model.Feed;
 import cn.rongcloud.moment.server.model.Like;
 import cn.rongcloud.moment.server.model.LikeNotifyData;
+import cn.rongcloud.moment.server.model.Message;
 import cn.rongcloud.moment.server.pojos.Paged;
 import cn.rongcloud.moment.server.pojos.ReqLikeIt;
 import cn.rongcloud.moment.server.pojos.RespLike;
@@ -47,6 +51,12 @@ public class LikeServiceImpl implements LikeService {
     @Resource
     CommentService commentService;
 
+    @Resource
+    MessageService messageService;
+
+    @Resource
+    RedisOptService redisOptService;
+
     @Override
     public RestResult likeIt(ReqLikeIt reqLike) throws RestException {
         String feedId = reqLike.getFeedId();
@@ -60,7 +70,24 @@ public class LikeServiceImpl implements LikeService {
         LikeNotifyData likeNotifyData = new LikeNotifyData();
         BeanUtils.copyProperties(like, likeNotifyData);
         likeNotifyData.setCreateDt(like.getCreateDt().getTime());
-        this.imHelper.publishCommentNtf(receivers, likeNotifyData, MomentsCommentMsgType.LIKETYPE);
+        this.imHelper.publishCommentNtf(receivers, likeNotifyData, MomentsCommentType.LIKE);
+
+        Message message = new Message();
+        message.setMessageId(like.getLikeId());
+        message.setUserId(UserHolder.getUid());
+        message.setCreateDt(DateTimeUtils.currentDt());
+        message.setMessageType(MomentsCommentType.LIKE.getType());
+        message.setStatus(MessageStatus.NORMAL.getValue());
+        messageService.saveMessage(message);
+
+        if (receivers != null && !receivers.isEmpty()) {
+            for (String receiverId: receivers) {
+                if (receiverId.equals(UserHolder.getUid())) {
+                    continue;
+                }
+                redisOptService.zsAdd(RedisKey.getUserUnreadMessageKey(receiverId), message, DateTimeUtils.currentDt().getTime());
+            }
+        }
 
         return RestResult.success(respLikeIt);
     }

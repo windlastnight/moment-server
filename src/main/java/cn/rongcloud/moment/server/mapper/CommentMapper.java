@@ -28,4 +28,6 @@ public interface CommentMapper {
     List<String> getAllCommentAndLikeUserIds(String feedId);
 
     Comment selectByCommentId(String commentId);
+
+    List<Comment> batchGetComment(@Param("commentIds") List<String> commentIds);
 }

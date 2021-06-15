@@ -10,6 +10,10 @@ public class RedisKey {
     private RedisKey() {}
 
     public static String getMomentPublishNotifyUsersKey() {
-        return CustomerConstant.SERVICE_NAME + "|publish_notify_users|";
+        return CustomerConstant.SERVICE_NAME + "|publish_notify_users";
+    }
+
+    public static String getUserUnreadMessageKey(String userId) {
+        return CustomerConstant.SERVICE_NAME + "|user_unread_message|" + userId;
     }
 }

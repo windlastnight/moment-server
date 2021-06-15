@@ -4,7 +4,7 @@ import cn.rongcloud.moment.server.common.CustomerConstant;
 import cn.rongcloud.moment.server.common.im.config.IMConfig;
 import cn.rongcloud.moment.server.common.im.message.MomentsCommentMessage;
 import cn.rongcloud.moment.server.common.im.message.MomentsUpdatedMessage;
-import cn.rongcloud.moment.server.enums.MomentsCommentMsgType;
+import cn.rongcloud.moment.server.enums.MomentsCommentType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -29,11 +29,11 @@ public class IMHelper {
                 .buildAndSend();
     }
 
-    public <T> void publishCommentNtf(List<String> staffIds, T content, MomentsCommentMsgType action) {
+    public <T> void publishCommentNtf(List<String> staffIds, T content, MomentsCommentType commentType) {
 
         MomentsCommentMessage message = new MomentsCommentMessage();
         message.setData(content);
-        message.setCommentType(action.getAction());
+        message.setCommentType(commentType.getType());
 
         IMRequestQueue.messageBuilder(CustomerConstant.SYSTEM_ID, ConversationType.SYSTEM, staffIds, message)
                 .persist(0)

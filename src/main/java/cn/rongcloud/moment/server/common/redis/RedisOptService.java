@@ -218,6 +218,9 @@ public class RedisOptService {
     public boolean zsAdd(String key, Object value, double score) {
         return zSetOperations.add(key, value, score);
     }
+    public Long zsSize(String key) {
+        return zSetOperations.size(key);
+    }
 
     public Object zReverseRangeByScore(String key, double start, double end) {
         return zSetOperations.reverseRangeByScore(key, start, end);

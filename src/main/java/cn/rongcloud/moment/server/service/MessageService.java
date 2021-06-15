@@ -1,0 +1,13 @@
+package cn.rongcloud.moment.server.service;
+
+import cn.rongcloud.moment.server.common.rest.RestResult;
+import cn.rongcloud.moment.server.model.Message;
+
+/**
+ * Created by sunyinglong on 2020/6/3
+ */
+public interface MessageService {
+    void saveMessage(Message message);
+    RestResult getUnreadCount();
+    RestResult getUnread();
+}

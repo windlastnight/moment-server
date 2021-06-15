@@ -23,4 +23,6 @@ public interface CommentService {
     List<Comment> getComments(String feedId, String fromCommentId, int size);
 
     List<String> getCommentNtfReceivers(Feed feed);
+
+    List<Comment> batchGetComment(List<String> commentIds);
 }

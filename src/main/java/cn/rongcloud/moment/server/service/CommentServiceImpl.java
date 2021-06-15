@@ -1,16 +1,21 @@
 package cn.rongcloud.moment.server.service;
 
 import cn.rongcloud.moment.server.common.im.IMHelper;
+import cn.rongcloud.moment.server.common.redis.RedisKey;
+import cn.rongcloud.moment.server.common.redis.RedisOptService;
 import cn.rongcloud.moment.server.common.rest.RestException;
 import cn.rongcloud.moment.server.common.rest.RestResult;
 import cn.rongcloud.moment.server.common.rest.RestResultCode;
+import cn.rongcloud.moment.server.common.utils.DateTimeUtils;
 import cn.rongcloud.moment.server.common.utils.IdentifierUtils;
 import cn.rongcloud.moment.server.common.utils.UserHolder;
-import cn.rongcloud.moment.server.enums.MomentsCommentMsgType;
+import cn.rongcloud.moment.server.enums.MessageStatus;
+import cn.rongcloud.moment.server.enums.MomentsCommentType;
 import cn.rongcloud.moment.server.mapper.CommentMapper;
 import cn.rongcloud.moment.server.model.Comment;
 import cn.rongcloud.moment.server.model.CommentNotifyData;
 import cn.rongcloud.moment.server.model.Feed;
+import cn.rongcloud.moment.server.model.Message;
 import cn.rongcloud.moment.server.pojos.Paged;
 import cn.rongcloud.moment.server.pojos.ReqCreateComment;
 import cn.rongcloud.moment.server.pojos.RespComment;
@@ -22,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -41,6 +47,12 @@ public class CommentServiceImpl implements CommentService {
 
     @Resource
     FeedService feedService;
+
+    @Resource
+    MessageService messageService;
+
+    @Resource
+    RedisOptService redisOptService;
 
     @Resource
     IMHelper imHelper;
@@ -67,7 +79,23 @@ public class CommentServiceImpl implements CommentService {
         CommentNotifyData commentNotifyData = new CommentNotifyData();
         BeanUtils.copyProperties(comment, commentNotifyData);
         commentNotifyData.setCreateDt(comment.getCreateDt().getTime());
-        this.imHelper.publishCommentNtf(receivers, commentNotifyData, MomentsCommentMsgType.COMMENTTYPE);
+        this.imHelper.publishCommentNtf(receivers, commentNotifyData, MomentsCommentType.COMMENT);
+
+        Message message = new Message();
+        message.setMessageId(comment.getCommentId());
+        message.setUserId(UserHolder.getUid());
+        message.setCreateDt(DateTimeUtils.currentDt());
+        message.setMessageType(MomentsCommentType.COMMENT.getType());
+        message.setStatus(MessageStatus.NORMAL.getValue());
+        messageService.saveMessage(message);
+        if (receivers != null && !receivers.isEmpty()) {
+            for (String receiverId: receivers) {
+                if (receiverId.equals(UserHolder.getUid())) {
+                    continue;
+                }
+                redisOptService.zsAdd(RedisKey.getUserUnreadMessageKey(receiverId), message, DateTimeUtils.currentDt().getTime());
+            }
+        }
 
         RespCreateComment respCreateComment = new RespCreateComment();
         BeanUtils.copyProperties(comment, respCreateComment);
@@ -82,6 +110,20 @@ public class CommentServiceImpl implements CommentService {
             receivers.add(feedOwner);
         }
         return receivers;
+    }
+
+    @Override
+    public List<Comment> batchGetComment(List<String> commentIds) {
+        List<Comment> comments;
+        if (commentIds == null || commentIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        comments = commentMapper.batchGetComment(commentIds);
+        if (comments == null) {
+            return new ArrayList<>();
+        }
+        return comments;
     }
 
     @Override

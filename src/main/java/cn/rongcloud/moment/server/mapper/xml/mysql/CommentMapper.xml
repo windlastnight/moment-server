@@ -149,4 +149,13 @@
     from T_COMMENT
     where COMMENT_ID = #{id}
   </select>
+
+  <select id="batchGetComment" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from T_COMMENT where COMMENT_ID in
+    <foreach item="commentId" collection="commentIds" open="(" separator="," close=")">
+      #{commentId}
+    </foreach>
+  </select>
 </mapper>
