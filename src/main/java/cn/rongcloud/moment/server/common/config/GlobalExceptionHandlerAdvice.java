@@ -92,7 +92,7 @@ public class GlobalExceptionHandlerAdvice {
     @ResponseStatus(value = HttpStatus.OK)
     @ExceptionHandler(RestException.class)
     public RestResult handleMiMicroAPIException(RestException ex) {
-        logException(ex);
+//        logException(ex);
         return ex.getRestResult();
     }
 

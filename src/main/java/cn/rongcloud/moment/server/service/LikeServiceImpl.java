@@ -4,11 +4,11 @@ import cn.rongcloud.moment.server.common.im.IMHelper;
 import cn.rongcloud.moment.server.common.rest.RestException;
 import cn.rongcloud.moment.server.common.rest.RestResult;
 import cn.rongcloud.moment.server.common.rest.RestResultCode;
+import cn.rongcloud.moment.server.common.utils.DateTimeUtils;
 import cn.rongcloud.moment.server.common.utils.IdentifierUtils;
 import cn.rongcloud.moment.server.common.utils.UserHolder;
 import cn.rongcloud.moment.server.enums.MomentsCommentMsgType;
 import cn.rongcloud.moment.server.mapper.LikeMapper;
-import cn.rongcloud.moment.server.model.Comment;
 import cn.rongcloud.moment.server.model.Feed;
 import cn.rongcloud.moment.server.model.Like;
 import cn.rongcloud.moment.server.model.LikeNotifyData;
@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -117,7 +116,7 @@ public class LikeServiceImpl implements LikeService {
 
     private Like saveLike(String feedId) {
         Like savedLike = new Like();
-        savedLike.setCreateDt(new Date());
+        savedLike.setCreateDt(DateTimeUtils.currentDt());
         savedLike.setFeedId(feedId);
         savedLike.setUserId(UserHolder.getUid());
         savedLike.setLikeId(IdentifierUtils.uuid24());

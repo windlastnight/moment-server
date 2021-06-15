@@ -4,6 +4,7 @@ import cn.rongcloud.moment.server.common.im.IMHelper;
 import cn.rongcloud.moment.server.common.rest.RestException;
 import cn.rongcloud.moment.server.common.rest.RestResult;
 import cn.rongcloud.moment.server.common.rest.RestResultCode;
+import cn.rongcloud.moment.server.common.utils.DateTimeUtils;
 import cn.rongcloud.moment.server.common.utils.IdentifierUtils;
 import cn.rongcloud.moment.server.common.utils.UserHolder;
 import cn.rongcloud.moment.server.enums.MomentsCommentMsgType;
@@ -58,7 +59,7 @@ public class CommentServiceImpl implements CommentService {
 
         Comment comment = new Comment();
         BeanUtils.copyProperties(reqComment, comment);
-        comment.setCreateDt(new Date());
+        comment.setCreateDt(DateTimeUtils.currentDt());
         comment.setUserId(UserHolder.getUid());
         comment.setCommentId(IdentifierUtils.uuid24());
         this.commentMapper.insertSelective(comment);

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.rongcloud.moment.server.mapper.UserSettingMapper">
+  <resultMap id="BaseResultMap" type="cn.rongcloud.moment.server.model.UserSetting">
+    <id column="USER_ID" jdbcType="VARCHAR" property="userId" />
+    <result column="COVER" jdbcType="VARCHAR" property="cover" />
+    <result column="UPDATE_DT" jdbcType="DATE" property="updateDt" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    USER_ID, COVER, UPDATE_DT
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from T_USER_SETTING
+    where USER_ID = #{userId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+    delete from T_USER_SETTING
+    where USER_ID = #{userId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="cn.rongcloud.moment.server.model.UserSetting">
+    insert into T_USER_SETTING (USER_ID, COVER, UPDATE_DT
+      )
+    values (#{userId,jdbcType=VARCHAR}, #{cover,jdbcType=VARCHAR}, #{updateDt,jdbcType=DATE}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="cn.rongcloud.moment.server.model.UserSetting">
+    insert into T_USER_SETTING
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="userId != null">
+        USER_ID,
+      </if>
+      <if test="cover != null">
+        COVER,
+      </if>
+      <if test="updateDt != null">
+        UPDATE_DT,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="userId != null">
+        #{userId,jdbcType=VARCHAR},
+      </if>
+      <if test="cover != null">
+        #{cover,jdbcType=VARCHAR},
+      </if>
+      <if test="updateDt != null">
+        #{updateDt,jdbcType=DATE},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.rongcloud.moment.server.model.UserSetting">
+    update T_USER_SETTING
+    <set>
+      <if test="cover != null">
+        COVER = #{cover,jdbcType=VARCHAR},
+      </if>
+      <if test="updateDt != null">
+        UPDATE_DT = #{updateDt,jdbcType=DATE},
+      </if>
+    </set>
+    where USER_ID = #{userId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.rongcloud.moment.server.model.UserSetting">
+    update T_USER_SETTING
+    set COVER = #{cover,jdbcType=VARCHAR},
+      UPDATE_DT = #{updateDt,jdbcType=DATE}
+    where USER_ID = #{userId,jdbcType=VARCHAR}
+  </update>
+</mapper>
