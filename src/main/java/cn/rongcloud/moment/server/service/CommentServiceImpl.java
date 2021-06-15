@@ -70,7 +70,7 @@ public class CommentServiceImpl implements CommentService {
 
         Comment comment = new Comment();
         BeanUtils.copyProperties(reqComment, comment);
-        comment.setCreateDt(new Date());
+        comment.setCreateDt(DateTimeUtils.currentDt());
         comment.setUserId(UserHolder.getUid());
         comment.setCommentId(IdentifierUtils.uuid24());
         this.commentMapper.insertSelective(comment);

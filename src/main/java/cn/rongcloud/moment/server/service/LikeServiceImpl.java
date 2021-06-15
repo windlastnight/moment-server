@@ -26,7 +26,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -144,7 +143,7 @@ public class LikeServiceImpl implements LikeService {
 
     private Like saveLike(String feedId) {
         Like savedLike = new Like();
-        savedLike.setCreateDt(new Date());
+        savedLike.setCreateDt(DateTimeUtils.currentDt());
         savedLike.setFeedId(feedId);
         savedLike.setUserId(UserHolder.getUid());
         savedLike.setLikeId(IdentifierUtils.uuid24());
