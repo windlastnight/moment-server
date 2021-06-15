@@ -23,10 +23,9 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by sunyinglong on 2020/6/3
@@ -132,8 +131,9 @@ public class FeedServiceImpl implements FeedService {
             }
         }
 
+        List<RespFeedInfo> sortResult = result.stream().sorted(Comparator.comparing(RespFeedInfo::getCreateDt).reversed()).collect(Collectors.toList());
         //TODO 校验用户是否有权限查看 Feed
-        return RestResult.success(result);
+        return RestResult.success(sortResult);
     }
 
     @Override
