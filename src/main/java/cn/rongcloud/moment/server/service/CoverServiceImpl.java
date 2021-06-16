@@ -1,7 +1,6 @@
 package cn.rongcloud.moment.server.service;
 
 import cn.rongcloud.moment.server.common.rest.RestResult;
-import cn.rongcloud.moment.server.common.rest.RestResultCode;
 import cn.rongcloud.moment.server.common.utils.UserHolder;
 import cn.rongcloud.moment.server.mapper.UserSettingMapper;
 import cn.rongcloud.moment.server.model.UserSetting;
@@ -37,8 +36,7 @@ public class CoverServiceImpl implements CoverService{
     }
 
     @Override
-    public RestResult getCover() {
-        return RestResult.success(Optional.ofNullable(this.userSettingMapper.selectByPrimaryKey(UserHolder.getUid())).map(UserSetting::getCover).orElse(null));
-
+    public RestResult getCover(String uid) {
+        return RestResult.success(Optional.ofNullable(this.userSettingMapper.selectByPrimaryKey(uid)).map(UserSetting::getCover).orElse(null));
     }
 }

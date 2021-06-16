@@ -6,6 +6,7 @@ import cn.rongcloud.moment.server.common.utils.UserHolder;
 import cn.rongcloud.moment.server.pojos.ReqSetCover;
 import cn.rongcloud.moment.server.service.CoverService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -30,9 +31,9 @@ public class SetController {
         return RestResult.success();
     }
 
-    @GetMapping("/cover")
-    public RestResult getCover(){
-        return this.coverService.getCover();
+    @GetMapping("/{uid}/cover")
+    public RestResult getCover(@Param(value = "uid") String uid){
+        return this.coverService.getCover(uid);
     }
 
 

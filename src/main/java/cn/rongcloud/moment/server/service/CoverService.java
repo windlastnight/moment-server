@@ -1,7 +1,6 @@
 package cn.rongcloud.moment.server.service;
 
 import cn.rongcloud.moment.server.common.rest.RestResult;
-import cn.rongcloud.moment.server.common.rest.RestResultCode;
 
 /**
  * @author renchaoyang
@@ -10,5 +9,5 @@ import cn.rongcloud.moment.server.common.rest.RestResultCode;
 public interface CoverService {
     void setCover(String cover);
 
-    RestResult getCover();
+    RestResult getCover(String uid);
 }
