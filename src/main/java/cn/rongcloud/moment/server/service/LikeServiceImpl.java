@@ -72,9 +72,10 @@ public class LikeServiceImpl implements LikeService {
         this.imHelper.publishCommentNtf(receivers, likeNotifyData, MomentsCommentType.LIKE);
 
         Message message = new Message();
+        message.setFeedId(feedId);
         message.setMessageId(like.getLikeId());
         message.setUserId(UserHolder.getUid());
-        message.setCreateDt(DateTimeUtils.currentDt());
+        message.setCreateDt(like.getCreateDt());
         message.setMessageType(MomentsCommentType.LIKE.getType());
         message.setStatus(MessageStatus.NORMAL.getValue());
         messageService.saveMessage(message);
@@ -84,7 +85,7 @@ public class LikeServiceImpl implements LikeService {
                 if (receiverId.equals(UserHolder.getUid())) {
                     continue;
                 }
-                redisOptService.zsAdd(RedisKey.getUserUnreadMessageKey(receiverId), message, DateTimeUtils.currentDt().getTime());
+                redisOptService.zsAdd(RedisKey.getUserUnreadMessageKey(receiverId), message, like.getCreateDt().getTime());
             }
         }
 

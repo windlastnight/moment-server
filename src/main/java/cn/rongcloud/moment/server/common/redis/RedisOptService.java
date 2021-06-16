@@ -215,8 +215,8 @@ public class RedisOptService {
 
     //===============================zset=================================
 
-    public boolean zsAdd(String key, Object value, double score) {
-        return zSetOperations.add(key, value, score);
+    public void zsAdd(String key, Object value, double score) {
+        zSetOperations.add(key, value, score);
     }
     public Long zsSize(String key) {
         return zSetOperations.size(key);

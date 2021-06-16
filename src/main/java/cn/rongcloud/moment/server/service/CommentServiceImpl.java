@@ -82,9 +82,10 @@ public class CommentServiceImpl implements CommentService {
         this.imHelper.publishCommentNtf(receivers, commentNotifyData, MomentsCommentType.COMMENT);
 
         Message message = new Message();
+        message.setFeedId(feed.getFeedId());
         message.setMessageId(comment.getCommentId());
         message.setUserId(UserHolder.getUid());
-        message.setCreateDt(DateTimeUtils.currentDt());
+        message.setCreateDt(comment.getCreateDt());
         message.setMessageType(MomentsCommentType.COMMENT.getType());
         message.setStatus(MessageStatus.NORMAL.getValue());
         messageService.saveMessage(message);
@@ -93,7 +94,7 @@ public class CommentServiceImpl implements CommentService {
                 if (receiverId.equals(UserHolder.getUid())) {
                     continue;
                 }
-                redisOptService.zsAdd(RedisKey.getUserUnreadMessageKey(receiverId), message, DateTimeUtils.currentDt().getTime());
+                redisOptService.zsAdd(RedisKey.getUserUnreadMessageKey(receiverId), message, comment.getCreateDt().getTime());
             }
         }
 
