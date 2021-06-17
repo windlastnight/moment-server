@@ -24,7 +24,7 @@ public class SetController {
     @Resource
     CoverService coverService;
 
-    @PostMapping("/cover")
+    @PutMapping("/cover")
     public RestResult setCover(@Valid @RequestBody ReqSetCover setCover) {
         log.info("set cover, operator:{}, data:{}", UserHolder.getUid(), GsonUtil.toJson(setCover));
         this.coverService.setCover(setCover.getCover());

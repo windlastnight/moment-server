@@ -4,6 +4,7 @@ import cn.rongcloud.moment.server.common.rest.RestResult;
 import cn.rongcloud.moment.server.common.utils.UserHolder;
 import cn.rongcloud.moment.server.mapper.UserSettingMapper;
 import cn.rongcloud.moment.server.model.UserSetting;
+import cn.rongcloud.moment.server.pojos.RespCover;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -37,6 +38,8 @@ public class CoverServiceImpl implements CoverService{
 
     @Override
     public RestResult getCover(String uid) {
-        return RestResult.success(Optional.ofNullable(this.userSettingMapper.selectByPrimaryKey(uid)).map(UserSetting::getCover).orElse(""));
+        RespCover res = new RespCover();
+        res.setCover(Optional.ofNullable(this.userSettingMapper.selectByPrimaryKey(uid)).map(UserSetting::getCover).orElse(""));
+        return RestResult.success(res);
     }
 }
