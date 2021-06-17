@@ -32,7 +32,7 @@ public class SetController {
     }
 
     @GetMapping("/{uid}/cover")
-    public RestResult getCover(@Param(value = "uid") String uid){
+    public RestResult getCover(@PathVariable(value = "uid") String uid){
         return this.coverService.getCover(uid);
     }
 
