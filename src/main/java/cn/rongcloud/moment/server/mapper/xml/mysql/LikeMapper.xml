@@ -6,7 +6,7 @@
     <result column="LIKE_ID" jdbcType="VARCHAR" property="likeId" />
     <result column="FEED_ID" jdbcType="VARCHAR" property="feedId" />
     <result column="USER_ID" jdbcType="VARCHAR" property="userId" />
-    <result column="CREATE_DT" jdbcType="DATE" property="createDt" />
+    <result column="CREATE_DT" jdbcType="TIMESTAMP" property="createDt" />
   </resultMap>
   <sql id="Base_Column_List">
     ID, LIKE_ID, FEED_ID, USER_ID, CREATE_DT
@@ -25,7 +25,7 @@
     insert into T_LIKE (ID, LIKE_ID, FEED_ID, 
       USER_ID, CREATE_DT)
     values (#{id,jdbcType=BIGINT}, #{likeId,jdbcType=VARCHAR}, #{feedId,jdbcType=VARCHAR}, 
-      #{userId,jdbcType=VARCHAR}, #{createDt,jdbcType=DATE})
+      #{userId,jdbcType=VARCHAR}, #{createDt,jdbcType=TIMESTAMP})
   </insert>
   <insert id="insertSelective" parameterType="cn.rongcloud.moment.server.model.Like">
     insert into T_LIKE
@@ -60,7 +60,7 @@
         #{userId,jdbcType=VARCHAR},
       </if>
       <if test="createDt != null">
-        #{createDt,jdbcType=DATE},
+        #{createDt,jdbcType=TIMESTAMP},
       </if>
     </trim>
   </insert>
@@ -77,7 +77,7 @@
         USER_ID = #{userId,jdbcType=VARCHAR},
       </if>
       <if test="createDt != null">
-        CREATE_DT = #{createDt,jdbcType=DATE},
+        CREATE_DT = #{createDt,jdbcType=TIMESTAMP},
       </if>
     </set>
     where ID = #{id,jdbcType=BIGINT}
@@ -87,7 +87,7 @@
     set LIKE_ID = #{likeId,jdbcType=VARCHAR},
       FEED_ID = #{feedId,jdbcType=VARCHAR},
       USER_ID = #{userId,jdbcType=VARCHAR},
-      CREATE_DT = #{createDt,jdbcType=DATE}
+      CREATE_DT = #{createDt,jdbcType=TIMESTAMP}
     where ID = #{id,jdbcType=BIGINT}
   </update>
 

@@ -8,7 +8,7 @@
     <result column="USER_ID" jdbcType="VARCHAR" property="userId" />
     <result column="COMMENT_CONTENT" jdbcType="VARCHAR" property="commentContent" />
     <result column="REPLY_TO" jdbcType="VARCHAR" property="replyTo" />
-    <result column="CREATE_DT" jdbcType="DATE" property="createDt" />
+    <result column="CREATE_DT" jdbcType="TIMESTAMP" property="createDt" />
   </resultMap>
   <sql id="Base_Column_List">
     ID, COMMENT_ID, FEED_ID, USER_ID, COMMENT_CONTENT, REPLY_TO, CREATE_DT
@@ -29,7 +29,7 @@
       CREATE_DT)
     values (#{id,jdbcType=BIGINT}, #{commentId,jdbcType=VARCHAR}, #{feedId,jdbcType=VARCHAR}, 
       #{userId,jdbcType=VARCHAR}, #{commentContent,jdbcType=VARCHAR}, #{replyTo,jdbcType=VARCHAR}, 
-      #{createDt,jdbcType=DATE})
+      #{createDt,jdbcType=TIMESTAMP})
   </insert>
   <insert id="insertSelective" parameterType="cn.rongcloud.moment.server.model.Comment">
     insert into T_COMMENT
@@ -76,7 +76,7 @@
         #{replyTo,jdbcType=VARCHAR},
       </if>
       <if test="createDt != null">
-        #{createDt,jdbcType=DATE},
+        #{createDt,jdbcType=TIMESTAMP},
       </if>
     </trim>
   </insert>
@@ -99,7 +99,7 @@
         REPLY_TO = #{replyTo,jdbcType=VARCHAR},
       </if>
       <if test="createDt != null">
-        CREATE_DT = #{createDt,jdbcType=DATE},
+        CREATE_DT = #{createDt,jdbcType=TIMESTAMP},
       </if>
     </set>
     where ID = #{id,jdbcType=BIGINT}
@@ -111,7 +111,7 @@
       USER_ID = #{userId,jdbcType=VARCHAR},
       COMMENT_CONTENT = #{commentContent,jdbcType=VARCHAR},
       REPLY_TO = #{replyTo,jdbcType=VARCHAR},
-      CREATE_DT = #{createDt,jdbcType=DATE}
+      CREATE_DT = #{createDt,jdbcType=TIMESTAMP}
     where ID = #{id,jdbcType=BIGINT}
   </update>
 

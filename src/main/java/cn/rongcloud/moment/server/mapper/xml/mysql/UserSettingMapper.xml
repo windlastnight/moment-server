@@ -4,7 +4,7 @@
   <resultMap id="BaseResultMap" type="cn.rongcloud.moment.server.model.UserSetting">
     <id column="USER_ID" jdbcType="VARCHAR" property="userId" />
     <result column="COVER" jdbcType="VARCHAR" property="cover" />
-    <result column="UPDATE_DT" jdbcType="DATE" property="updateDt" />
+    <result column="UPDATE_DT" jdbcType="TIMESTAMP" property="updateDt" />
   </resultMap>
   <sql id="Base_Column_List">
     USER_ID, COVER, UPDATE_DT
@@ -22,7 +22,7 @@
   <insert id="insert" parameterType="cn.rongcloud.moment.server.model.UserSetting">
     insert into T_USER_SETTING (USER_ID, COVER, UPDATE_DT
       )
-    values (#{userId,jdbcType=VARCHAR}, #{cover,jdbcType=VARCHAR}, #{updateDt,jdbcType=DATE}
+    values (#{userId,jdbcType=VARCHAR}, #{cover,jdbcType=VARCHAR}, #{updateDt,jdbcType=TIMESTAMP}
       )
   </insert>
   <insert id="insertSelective" parameterType="cn.rongcloud.moment.server.model.UserSetting">
@@ -46,7 +46,7 @@
         #{cover,jdbcType=VARCHAR},
       </if>
       <if test="updateDt != null">
-        #{updateDt,jdbcType=DATE},
+        #{updateDt,jdbcType=TIMESTAMP},
       </if>
     </trim>
   </insert>
@@ -57,7 +57,7 @@
         COVER = #{cover,jdbcType=VARCHAR},
       </if>
       <if test="updateDt != null">
-        UPDATE_DT = #{updateDt,jdbcType=DATE},
+        UPDATE_DT = #{updateDt,jdbcType=TIMESTAMP},
       </if>
     </set>
     where USER_ID = #{userId,jdbcType=VARCHAR}
@@ -65,7 +65,7 @@
   <update id="updateByPrimaryKey" parameterType="cn.rongcloud.moment.server.model.UserSetting">
     update T_USER_SETTING
     set COVER = #{cover,jdbcType=VARCHAR},
-      UPDATE_DT = #{updateDt,jdbcType=DATE}
+      UPDATE_DT = #{updateDt,jdbcType=TIMESTAMP}
     where USER_ID = #{userId,jdbcType=VARCHAR}
   </update>
 </mapper>
