@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -94,6 +95,19 @@ public class GlobalExceptionHandlerAdvice {
     public RestResult handleMiMicroAPIException(RestException ex) {
 //        logException(ex);
         return ex.getRestResult();
+    }
+
+    /**
+     * 处理其他异常
+     * @param req
+     * @param e
+     * @return
+     */
+    @ResponseStatus(value = HttpStatus.OK)
+    @ExceptionHandler(value =Exception.class)
+    public RestResult exceptionHandler(HttpServletRequest req, Exception e){
+        logException(e);
+        return getResponseData(RestResultCode.ERR_OTHER,  e.getMessage());
     }
 
     private void logException(Exception ex) {
