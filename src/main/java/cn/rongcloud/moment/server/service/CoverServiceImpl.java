@@ -37,6 +37,6 @@ public class CoverServiceImpl implements CoverService{
 
     @Override
     public RestResult getCover(String uid) {
-        return RestResult.success(Optional.ofNullable(this.userSettingMapper.selectByPrimaryKey(uid)).map(UserSetting::getCover).orElse(null));
+        return RestResult.success(Optional.ofNullable(this.userSettingMapper.selectByPrimaryKey(uid)).map(UserSetting::getCover).orElse(""));
     }
 }
