@@ -110,6 +110,7 @@ public class CommentServiceImpl implements CommentService {
         if (!receivers.contains(feedOwner)) {
             receivers.add(feedOwner);
         }
+        receivers.remove(UserHolder.getUid());
         return receivers;
     }
 
