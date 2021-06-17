@@ -23,6 +23,7 @@ public class IMHelper {
         MomentsUpdatedMessage message = new MomentsUpdatedMessage();
 
         IMRequestQueue.messageBuilder(CustomerConstant.SYSTEM_ID, ConversationType.SYSTEM, staffIds, message)
+                .status(1)
                 .persist(0)
                 .includeSender(0)
                 .imConfig(imConfig)
@@ -37,6 +38,7 @@ public class IMHelper {
 
         IMRequestQueue.messageBuilder(CustomerConstant.SYSTEM_ID, ConversationType.SYSTEM, staffIds, message)
                 .persist(0)
+                .status(1)
                 .includeSender(0)
                 .imConfig(imConfig)
                 .buildAndSend();

@@ -4,6 +4,8 @@ import cn.rongcloud.moment.server.common.im.config.IMConfig;
 import cn.rongcloud.moment.server.common.utils.GsonUtil;
 import io.rong.RongCloud;
 import io.rong.messages.BaseMessage;
+import io.rong.models.message.PrivateMessage;
+import io.rong.models.message.PrivateStatusMessage;
 import io.rong.models.message.SystemMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -271,9 +273,22 @@ public class IMRequestQueue {
         int code = 0;
         try {
             if( object.conversationType == ConversationType.SYSTEM) {
-                SystemMessage message = new SystemMessage(object.fromUser, object.targetIds, object.messageContent.getType(), object.messageContent, object.pushContent, object.pushData, object.isPersist, object.isCount, 0);
-                code = RongCloud.getInstance(object.imConfig.getAppKey(), object.imConfig.getSecret(), object.imConfig.getHost()).message.system.send(message).getCode();
-                LOGGER.info("call im publish message, message:{}, code:{}", GsonUtil.toJson(message), code);
+                if (object.isStatus == 0) {
+                    PrivateStatusMessage message = new PrivateStatusMessage();
+                    message.setSenderId(object.fromUser);
+                    message.setContent(object.messageContent);
+                    message.setIsIncludeSender(object.isIncludeSender);
+                    message.setObjectName(object.messageContent.getType());
+                    message.setTargetId(object.targetIds);
+                    message.setVerifyBlacklist(0);
+                    code = RongCloud.getInstance(object.imConfig.getAppKey(), object.imConfig.getSecret(), object.imConfig.getHost()).message.msgPrivate.sendStatusMessage(message).getCode();
+                    LOGGER.info("call im publish message, message:{}, code:{}", GsonUtil.toJson(message), code);
+                } else {
+                    PrivateMessage message = new PrivateMessage(object.fromUser, object.targetIds, object.messageContent.getType(), object.messageContent, object.pushContent, object.pushData, null, object.isPersist, object.isCount, 0, object.isIncludeSender, 0);
+                    code = RongCloud.getInstance(object.imConfig.getAppKey(), object.imConfig.getSecret(), object.imConfig.getHost()).message.msgPrivate.send(message).getCode();
+                    LOGGER.info("call im publish message, message:{}, code:{}", GsonUtil.toJson(message), code);
+                }
+
             } else {
                 LOGGER.error("UnSupport conversation type: {}", object.conversationType);
                 return;
