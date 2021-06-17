@@ -189,6 +189,7 @@ public class FeedServiceImpl implements FeedService {
                 respCommentInfo.setContent(comment.getCommentContent());
                 respCommentInfo.setUserId(comment.getUserId());
                 respCommentInfo.setCreateDt(comment.getCreateDt());
+                respCommentInfo.setReplyTo(comment.getReplyTo());
                 respCommentInfoList.add(respCommentInfo);
             }
         }
