@@ -17,7 +17,7 @@ public class Paged {
     @JsonProperty("from_comment_id")
     private String fromUId;
 
-    @Min(value = 1)
+//    @Min(value = 1)
     private Integer size;
 
     private Long fromId;
