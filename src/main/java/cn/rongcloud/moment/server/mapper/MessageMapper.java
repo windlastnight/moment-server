@@ -19,4 +19,5 @@ public interface MessageMapper {
 
     void deleteAll(@Param("userId") String userId);
 
+    void batchInsertMessage(@Param("messages") List<Message> messages);
 }

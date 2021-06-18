@@ -9,7 +9,7 @@ import java.util.List;
  * Created by sunyinglong on 2020/6/3
  */
 public interface MessageService {
-    void saveMessage(Message message);
+    void saveMessage(List<Message> messages);
     RestResult getUnreadCount();
     RestResult getUnread();
     RestResult getHistory(String fromMessageId, Integer size);

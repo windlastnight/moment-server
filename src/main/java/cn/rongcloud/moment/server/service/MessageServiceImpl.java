@@ -45,8 +45,8 @@ public class MessageServiceImpl implements MessageService {
     private LikeService likeService;
 
     @Override
-    public void saveMessage(Message message) {
-        messageMapper.insertMessage(message);
+    public void saveMessage(List<Message> messages) {
+        messageMapper.batchInsertMessage(messages);
     }
 
     @Override
@@ -124,7 +124,7 @@ public class MessageServiceImpl implements MessageService {
             RespMessageInfo respMessageInfo = new RespMessageInfo();
             respMessageInfo.setFeedId(message.getFeedId());
             respMessageInfo.setMessageId(message.getMessageId());
-            respMessageInfo.setUserId(message.getUserId());
+            respMessageInfo.setUserId(message.getPublishUserId());
             respMessageInfo.setStatus(message.getStatus());
             respMessageInfo.setType(message.getMessageType());
             respMessageInfo.setCreateDt(message.getCreateDt());

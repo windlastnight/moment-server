@@ -11,11 +11,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="userId" column="USER_ID"/>
         <result property="messageType" column="MESSAGE_TYPE"/>
         <result property="createDt" column="CREATE_DT"/>
+        <result property="publishUserId" column="PUBLISH_USER_ID"/>
         <result property="status" column="STATUS"/>
     </resultMap>
 
     <sql id="selectTMessageVo">
-        SELECT ID, MESSAGE_ID, FEED_ID, USER_ID, MESSAGE_TYPE, CREATE_DT, STATUS FROM T_MESSAGE
+        SELECT ID, MESSAGE_ID, FEED_ID, USER_ID, MESSAGE_TYPE, CREATE_DT, STATUS, PUBLISH_USER_ID FROM T_MESSAGE
     </sql>
 
     <insert id="insertMessage" parameterType="cn.rongcloud.moment.server.model.Message" useGeneratedKeys="true" keyProperty="id">
@@ -26,7 +27,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             USER_ID,
             MESSAGE_TYPE,
             CREATE_DT,
-            STATUS
+            STATUS,
+            PUBLISH_USER_ID,
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             #{messageId},
@@ -35,8 +37,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{messageType},
             #{createDt},
             #{status},
+            #{publishUserId}
         </trim>
     </insert>
+
+    <insert id="batchInsertMessage">
+        INSERT INTO T_MESSAGE (MESSAGE_ID, FEED_ID, USER_ID, MESSAGE_TYPE, CREATE_DT, STATUS, PUBLISH_USER_ID) VALUES
+        <foreach collection ="messages" item="message" separator =",">
+            (#{message.messageId}, #{message.feedId}, #{message.userId}, #{message.messageType}, #{message.createDt}, #{message.status}, #{message.publishUserId})
+        </foreach >
+    </insert>
+
+
 
     <select id="getMessage" resultMap="messageResult">
         <include refid="selectTMessageVo"/>

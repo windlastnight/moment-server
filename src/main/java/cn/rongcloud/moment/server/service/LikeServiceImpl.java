@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -71,22 +72,25 @@ public class LikeServiceImpl implements LikeService {
         likeNotifyData.setCreateDt(like.getCreateDt().getTime());
         this.imHelper.publishCommentNtf(receivers, likeNotifyData, MomentsCommentType.LIKE);
 
-        Message message = new Message();
-        message.setFeedId(feedId);
-        message.setMessageId(like.getLikeId());
-        message.setUserId(UserHolder.getUid());
-        message.setCreateDt(like.getCreateDt());
-        message.setMessageType(MomentsCommentType.LIKE.getType());
-        message.setStatus(MessageStatus.NORMAL.getValue());
-        messageService.saveMessage(message);
-
         if (receivers != null && !receivers.isEmpty()) {
+
+            List<Message> messages = new ArrayList<>();
             for (String receiverId: receivers) {
                 if (receiverId.equals(UserHolder.getUid())) {
                     continue;
                 }
+                Message message = new Message();
+                message.setFeedId(feedId);
+                message.setMessageId(like.getLikeId());
+                message.setUserId(receiverId);
+                message.setPublishUserId(UserHolder.getUid());
+                message.setCreateDt(like.getCreateDt());
+                message.setMessageType(MomentsCommentType.LIKE.getType());
+                message.setStatus(MessageStatus.NORMAL.getValue());
+                messages.add(message);
                 redisOptService.zsAdd(RedisKey.getUserUnreadMessageKey(receiverId), message, like.getCreateDt().getTime());
             }
+            messageService.saveMessage(messages);
         }
 
         return RestResult.success(respLikeIt);
