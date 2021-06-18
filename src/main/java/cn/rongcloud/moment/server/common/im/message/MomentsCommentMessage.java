@@ -16,6 +16,8 @@ public class MomentsCommentMessage<T> extends BaseMessage {
 
     private Integer commentType;
 
+    private Long delayPullTime;
+
     @Override
     public String toString() {
         return GsonUtil.toJson(this, MomentsCommentMessage.class);
