@@ -15,9 +15,9 @@ public interface FeedService {
 
     RestResult delete(String userId, String feedId);
 
-    RestResult getFeedInfo(String userId, String feedId);
+    RestResult getFeedInfo(String feedId, boolean withComments, int commentSize, boolean withLikes, int likeSize);
 
-    RestResult batchGetFeedInfo(String userId, List<String> feedIds);
+    RestResult batchGetFeedInfo(List<String> feedIds, boolean withComments, int commentSize, boolean withLikes, int likeSize);
 
     RestResult getNewFeed(String latestFeedId);
 

@@ -36,15 +36,23 @@ public class FeedController {
     }
 
     @GetMapping("/{feedId}")
-    public RestResult getFeedInfo(@PathVariable String feedId) {
-        log.info("get feed, operator:{}, data:{}", UserHolder.getUid(), feedId);
-        return feedService.getFeedInfo(UserHolder.getUid(), feedId);
+    public RestResult getFeedInfo(@PathVariable String feedId,
+                                  @RequestParam(value = "with_comments", required = false, defaultValue = "true") boolean withComments,
+                                  @RequestParam(value = "comment_size", required = false, defaultValue = "20") int commentSize,
+                                  @RequestParam(value = "with_likes", required = false, defaultValue = "true") boolean withLikes,
+                                  @RequestParam(value = "like_size", required = false, defaultValue = "20") int likeSize) {
+        log.info("get feed, operator:{}, feedId:{}, with_comments:{}, commentSize:{}, withLikes:{}, likeSize:{}", UserHolder.getUid(), feedId, withComments, commentSize, withLikes, likeSize);
+        return feedService.getFeedInfo(feedId, withComments, commentSize, withLikes, likeSize);
     }
 
     @PostMapping("/batch")
-    public RestResult batchGetFeedInfo(@RequestBody ReqIds data) {
-        log.info("batch get feed, operator:{}, data:{}", UserHolder.getUid(), GsonUtil.toJson(data));
-        return feedService.batchGetFeedInfo(UserHolder.getUid(), data.getIds());
+    public RestResult batchGetFeedInfo(@RequestBody ReqIds data,
+                                       @RequestParam(value = "with_comments", required = false, defaultValue = "true") boolean withComments,
+                                       @RequestParam(value = "comment_size", required = false, defaultValue = "20") int commentSize,
+                                       @RequestParam(value = "with_likes", required = false, defaultValue = "true") boolean withLikes,
+                                       @RequestParam(value = "like_size", required = false, defaultValue = "20") int likeSize) {
+        log.info("batch get feed, operator:{}, feedIds:{}, with_comments:{}, commentSize:{}, withLikes:{}, likeSize:{}", UserHolder.getUid(), GsonUtil.toJson(data.getIds()), withComments, commentSize, withLikes, likeSize);
+        return feedService.batchGetFeedInfo(data.getIds(), withComments, commentSize, withLikes, likeSize);
     }
 
     @GetMapping("/new")

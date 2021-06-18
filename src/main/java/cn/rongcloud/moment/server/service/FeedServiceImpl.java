@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -104,36 +105,47 @@ public class FeedServiceImpl implements FeedService {
     }
 
     @Override
-    public RestResult getFeedInfo(String userId, String feedId) {
+    public RestResult getFeedInfo(String feedId, boolean withComments, int commentSize, boolean withLikes, int likeSize) {
         //检查feed是否存在
         Feed feed = feedMapper.getFeedById(feedId);
         if (feed == null) {
             return RestResult.generic(RestResultCode.ERR_FEED_NOT_EXISTED);
         }
         //TODO 校验用户是否有权限查看 Feed
-        RespFeedInfo resp = build(feed);
+        RespFeedInfo resp = build(feed, withComments, commentSize, withLikes, likeSize);
         return RestResult.success(resp);
     }
 
     @Override
-    public RestResult batchGetFeedInfo(String userId, List<String> feedIds) {
+    public RestResult batchGetFeedInfo(List<String> feedIds, boolean withComments, int commentSize, boolean withLikes, int likeSize) {
 
-        List<RespFeedInfo> result = new ArrayList<>();
+        List<RespFeedInfo> respFeedInfoList = new ArrayList<>();
         if (feedIds == null || feedIds.isEmpty()) {
-            return RestResult.success(result);
+            return RestResult.success(respFeedInfoList);
         }
 
         List<Feed> feeds = feedMapper.getFeedsByIds(feedIds);
         if (feeds != null && !feeds.isEmpty()) {
             for (Feed feed: feeds) {
-                RespFeedInfo resp = build(feed);
-                result.add(resp);
+                RespFeedInfo resp = build(feed, withComments, commentSize, withLikes, likeSize);
+                respFeedInfoList.add(resp);
             }
         }
 
-        List<RespFeedInfo> sortResult = result.stream().sorted(Comparator.comparing(RespFeedInfo::getCreateDt).reversed()).collect(Collectors.toList());
+        List<RespFeedInfo> result = new ArrayList<>();
+        Map<String, RespFeedInfo> feedInfoMap = respFeedInfoList.stream().collect(Collectors.toMap(RespFeedInfo::getFeedId, Function.identity()));
+        for (String feedId: feedIds) {
+            if (feedInfoMap.containsKey(feedId)) {
+                result.add(feedInfoMap.get(feedId));
+            } else {
+                RespFeedInfo feedInfo = new RespFeedInfo();
+                feedInfo.setFeedId(feedId);
+                feedInfo.setFeedStatus(1);
+                result.add(feedInfo);
+            }
+        }
         //TODO 校验用户是否有权限查看 Feed
-        return RestResult.success(sortResult);
+        return RestResult.success(result);
     }
 
     @Override
@@ -170,7 +182,7 @@ public class FeedServiceImpl implements FeedService {
         return feed;
     }
 
-    private RespFeedInfo build(Feed feed){
+    private RespFeedInfo build(Feed feed, boolean withComments, int commentSize, boolean withLikes, int likeSize){
         RespFeedInfo resp = new RespFeedInfo();
         resp.setFeedId(feed.getFeedId());
         resp.setUserId(feed.getUserId());
@@ -180,33 +192,37 @@ public class FeedServiceImpl implements FeedService {
         resp.setCreateDt(feed.getCreateDt());
         resp.setUpdateDt(feed.getUpdateDt());
 
-        List<RespCommentInfo> respCommentInfoList = new ArrayList<>();
-        List<Comment> comments = commentService.getComments(feed.getFeedId(), null, 20);
-        if (comments != null && !comments.isEmpty()){
-            for (Comment comment: comments) {
-                RespCommentInfo respCommentInfo = new RespCommentInfo();
-                respCommentInfo.setCommentId(comment.getCommentId());
-                respCommentInfo.setContent(comment.getCommentContent());
-                respCommentInfo.setUserId(comment.getUserId());
-                respCommentInfo.setCreateDt(comment.getCreateDt());
-                respCommentInfo.setReplyTo(comment.getReplyTo());
-                respCommentInfoList.add(respCommentInfo);
+        if (withComments) {
+            List<RespCommentInfo> respCommentInfoList = new ArrayList<>();
+            List<Comment> comments = commentService.getComments(feed.getFeedId(), null, commentSize);
+            if (comments != null && !comments.isEmpty()){
+                for (Comment comment: comments) {
+                    RespCommentInfo respCommentInfo = new RespCommentInfo();
+                    respCommentInfo.setCommentId(comment.getCommentId());
+                    respCommentInfo.setContent(comment.getCommentContent());
+                    respCommentInfo.setUserId(comment.getUserId());
+                    respCommentInfo.setCreateDt(comment.getCreateDt());
+                    respCommentInfo.setReplyTo(comment.getReplyTo());
+                    respCommentInfoList.add(respCommentInfo);
+                }
             }
+            resp.setComments(respCommentInfoList);
         }
-        resp.setComments(respCommentInfoList);
 
-        List<RespLikeInfo> respLikeInfoList = new ArrayList<>();
-        List<Like> likes = likeService.getLikes(feed.getFeedId(), null, 20);
-        if (likes != null && !likes.isEmpty()) {
-            for (Like like: likes) {
-                RespLikeInfo respLikeInfo = new RespLikeInfo();
-                respLikeInfo.setLikeId(like.getLikeId());
-                respLikeInfo.setUserId(like.getUserId());
-                respLikeInfo.setCreateDt(like.getCreateDt());
-                respLikeInfoList.add(respLikeInfo);
+        if (withLikes) {
+            List<RespLikeInfo> respLikeInfoList = new ArrayList<>();
+            List<Like> likes = likeService.getLikes(feed.getFeedId(), null, likeSize);
+            if (likes != null && !likes.isEmpty()) {
+                for (Like like: likes) {
+                    RespLikeInfo respLikeInfo = new RespLikeInfo();
+                    respLikeInfo.setLikeId(like.getLikeId());
+                    respLikeInfo.setUserId(like.getUserId());
+                    respLikeInfo.setCreateDt(like.getCreateDt());
+                    respLikeInfoList.add(respLikeInfo);
+                }
             }
+            resp.setLikes(respLikeInfoList);
         }
-        resp.setLikes(respLikeInfoList);
 
         return resp;
     }
