@@ -273,7 +273,7 @@ public class IMRequestQueue {
         int code = 0;
         try {
             if( object.conversationType == ConversationType.SYSTEM) {
-                if (object.isStatus == 0) {
+                if (object.isStatus == 1) {
                     PrivateStatusMessage message = new PrivateStatusMessage();
                     message.setSenderId(object.fromUser);
                     message.setContent(object.messageContent);
