@@ -58,7 +58,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="getMessageByPage" resultMap="messageResult">
         <include refid="selectTMessageVo"/>
         WHERE USER_ID = #{userId}
-        <if test="fromMessageAutoIncId != null"> AND ID &lt; #{fromTimelineAutoIncId} </if>
+        <if test="fromMessageAutoIncId != null"> AND ID &lt; #{fromMessageAutoIncId} </if>
         ORDER BY ID DESC LIMIT #{size}
     </select>
 
