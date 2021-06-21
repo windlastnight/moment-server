@@ -18,10 +18,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -60,10 +57,9 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public RestResult getUnread() {
 
-        List<Message> messages = (List<Message>) optService.zReverseRangeByScore(RedisKey.getUserUnreadMessageKey(UserHolder.getUid()), 0, -1);
+        Set<Message> messages = (Set<Message>) optService.zsAll(RedisKey.getUserUnreadMessageKey(UserHolder.getUid()));
         optService.deleteKey(RedisKey.getUserUnreadMessageKey(UserHolder.getUid()));
-        List<RespMessageInfo> resp = buildRespMessage(messages);
-
+        List<RespMessageInfo> resp = buildRespMessage(new ArrayList<>(messages));
         return RestResult.success(resp);
     }
 
