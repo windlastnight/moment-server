@@ -74,4 +74,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         DELETE FROM T_MESSAGE WHERE USER_ID = #{userId}
     </delete>
 
+    <update id="updateStatus">
+        UPDATE T_MESSAGE SET STATUS = #{status} WHERE MESSAGE_ID = #{messageId}
+    </update>
+
 </mapper>

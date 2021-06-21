@@ -141,6 +141,7 @@ public class CommentServiceImpl implements CommentService {
             throw new RestException(RestResult.generic(RestResultCode.ERR_FEED_NOT_EXISTED));
         }
         this.commentMapper.deleteByPrimaryKey(comment.getId());
+        messageService.updateStatus(commentId, MessageStatus.DELETED.getValue());
     }
 
     @Override

@@ -20,4 +20,6 @@ public interface MessageMapper {
     void deleteAll(@Param("userId") String userId);
 
     void batchInsertMessage(@Param("messages") List<Message> messages);
+
+    void updateStatus(@Param("status") Integer status, @Param("messageId") String messageId);
 }

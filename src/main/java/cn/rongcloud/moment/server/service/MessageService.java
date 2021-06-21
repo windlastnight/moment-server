@@ -16,4 +16,5 @@ public interface MessageService {
 
     RestResult batchDelete(List<String> ids);
     RestResult deleteAll();
+    void updateStatus(String messageId, Integer status);
 }

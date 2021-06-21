@@ -98,6 +98,11 @@ public class MessageServiceImpl implements MessageService {
         return RestResult.success();
     }
 
+    @Override
+    public void updateStatus(String messageId, Integer status) {
+        messageMapper.updateStatus(status, messageId);
+    }
+
     private List<RespMessageInfo> buildRespMessage(List<Message> messages) {
 
         List<RespMessageInfo> resp = new ArrayList<>();
