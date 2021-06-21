@@ -106,7 +106,9 @@
     <if test="fromLikeId != null and fromLikeId != ''">
       and  ID &gt; #{fromLikeId}
     </if>
-    limit #{size}
+    <if test="size != null">
+      limit #{size}
+    </if>
   </select>
 
   <select id="selectByLikeId" parameterType="java.lang.String" resultMap="BaseResultMap">

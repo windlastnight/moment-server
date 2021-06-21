@@ -130,7 +130,9 @@
     <if test="fromAutoIncCommentId != null and fromAutoIncCommentId != ''">
       and  ID &gt; #{fromAutoIncCommentId}
     </if>
+    <if test="size != null">
     limit #{size}
+    </if>
   </select>
 
   <select id="getAllCommentAndLikeUserIds" resultType="java.lang.String">

@@ -12,25 +12,21 @@ import cn.rongcloud.moment.server.common.utils.UserHolder;
 import cn.rongcloud.moment.server.enums.MessageStatus;
 import cn.rongcloud.moment.server.enums.MomentsCommentType;
 import cn.rongcloud.moment.server.mapper.CommentMapper;
-import cn.rongcloud.moment.server.model.Comment;
-import cn.rongcloud.moment.server.model.CommentNotifyData;
-import cn.rongcloud.moment.server.model.Feed;
-import cn.rongcloud.moment.server.model.Message;
+import cn.rongcloud.moment.server.model.*;
 import cn.rongcloud.moment.server.pojos.Paged;
 import cn.rongcloud.moment.server.pojos.ReqCreateComment;
 import cn.rongcloud.moment.server.pojos.RespComment;
 import cn.rongcloud.moment.server.pojos.RespCreateComment;
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -38,7 +34,6 @@ import java.util.stream.Collectors;
  * @date 2021/6/9
  */
 @Slf4j
-@Transactional
 @Service
 public class CommentServiceImpl implements CommentService {
 
@@ -57,6 +52,12 @@ public class CommentServiceImpl implements CommentService {
     @Resource
     IMHelper imHelper;
 
+    @Resource(name = "redisTemplate")
+    ZSetOperations zSetOperations;
+
+    @Resource
+    CacheExpireProperties expireProperties;
+
     @Override
     public RestResult comment(ReqCreateComment reqComment) {
 //        1.检查feedid是否有效
@@ -64,6 +65,7 @@ public class CommentServiceImpl implements CommentService {
 //        2.检查replyto是否有效TApplicationTypeMapper.xml
 
         String replyTo = reqComment.getReplyTo();
+        String feedId = feed.getFeedId();
         if (StringUtils.isNotBlank(replyTo)) {
             checkCommentUserExists(reqComment.getFeedId(), replyTo);
         }
@@ -74,6 +76,10 @@ public class CommentServiceImpl implements CommentService {
         comment.setUserId(UserHolder.getUid());
         comment.setCommentId(IdentifierUtils.uuid24());
         this.commentMapper.insertSelective(comment);
+
+        handleCommentCache(feedId);
+        CacheService.cacheOne(RedisKey.getCommentSetKey(feedId), RedisKey.getCommentKey(feedId), comment.getCommentId(),
+                comment, CacheService.date2Score(comment.getCreateDt()), expireProperties.getComment());
 
         List<String> receivers = this.getCommentNtfReceivers(feed);
         CommentNotifyData commentNotifyData = new CommentNotifyData();
@@ -88,9 +94,9 @@ public class CommentServiceImpl implements CommentService {
         message.setCreateDt(comment.getCreateDt());
         message.setMessageType(MomentsCommentType.COMMENT.getType());
         message.setStatus(MessageStatus.NORMAL.getValue());
-        messageService.saveMessage(message);
+//        messageService.saveMessage(message);
         if (receivers != null && !receivers.isEmpty()) {
-            for (String receiverId: receivers) {
+            for (String receiverId : receivers) {
                 if (receiverId.equals(UserHolder.getUid())) {
                     continue;
                 }
@@ -128,6 +134,10 @@ public class CommentServiceImpl implements CommentService {
         return comments;
     }
 
+    public void handleCommentCache(String feedId) {
+        CacheService.cacheHandle(RedisKey.getCommentSetKey(feedId), CacheService.getComments, feedId, expireProperties.getComment());
+    }
+
     @Override
     public void delComment(String feedId, String commentId) {
         this.feedService.checkFeedExists(feedId);
@@ -138,12 +148,14 @@ public class CommentServiceImpl implements CommentService {
             throw new RestException(RestResult.generic(RestResultCode.ERR_FEED_NOT_EXISTED));
         }
         this.commentMapper.deleteByPrimaryKey(comment.getId());
+        CacheService.uncacheOne(RedisKey.getCommentSetKey(feedId), RedisKey.getCommentKey(feedId), commentId);
     }
 
     @Override
     public RestResult getPagedComments(String feedId, Paged page) {
         this.feedService.checkFeedExists(feedId);
         List<Comment> comments = getComments(feedId, page.getFromUId(), page.getSize());
+
         List<RespComment> res = comments.stream().map(cm -> {
             RespComment respComment = new RespComment();
             BeanUtils.copyProperties(cm, respComment);
@@ -154,15 +166,24 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public List<Comment> getComments(String feedId, String fromCommentId, int size) {
-        Long fromAutoIncCommentId = null;
-        if (StringUtils.isNotBlank(fromCommentId)) {
-            Comment comment = commentMapper.selectByCommentId(fromCommentId);
-            if (Objects.isNull(comment)) {
-                throw new RestException(RestResult.generic(RestResultCode.ERR_COMMENT_NOT_EXISTED));
-            }
-            fromAutoIncCommentId = comment.getId();
+        handleCommentCache(feedId);
+        String zsetKey = RedisKey.getCommentSetKey(feedId);
+        Long index;
+        if (fromCommentId != null) {
+            index = zSetOperations.rank(zsetKey, fromCommentId);
+        } else {
+            index = 1L;
         }
-        return this.commentMapper.selectPagedComment(feedId, fromAutoIncCommentId, size);
+        List<Comment> comments = Lists.newArrayList();
+        if (index == null) {
+            throw new RestException(RestResult.generic(RestResultCode.ERR_COMMENT_NOT_EXISTED));
+        } else {
+            Set keys = zSetOperations.range(zsetKey, index, size);
+            if (!CollectionUtils.isEmpty(keys)) {
+                comments = (List<Comment>) Optional.ofNullable(redisOptService.hmget(RedisKey.getCommentKey(feedId), Lists.newArrayList(keys.iterator()))).map(Map::values).map(Lists::newArrayList).orElse(Lists.newArrayList());
+            }
+        }
+        return comments;
     }
 
     private void checkCommentUserExists(String feedId, String userId) {

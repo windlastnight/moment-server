@@ -12,29 +12,25 @@ import cn.rongcloud.moment.server.common.utils.UserHolder;
 import cn.rongcloud.moment.server.enums.MessageStatus;
 import cn.rongcloud.moment.server.enums.MomentsCommentType;
 import cn.rongcloud.moment.server.mapper.LikeMapper;
-import cn.rongcloud.moment.server.model.Feed;
-import cn.rongcloud.moment.server.model.Like;
-import cn.rongcloud.moment.server.model.LikeNotifyData;
-import cn.rongcloud.moment.server.model.Message;
+import cn.rongcloud.moment.server.model.*;
 import cn.rongcloud.moment.server.pojos.Paged;
 import cn.rongcloud.moment.server.pojos.ReqLikeIt;
 import cn.rongcloud.moment.server.pojos.RespLike;
 import cn.rongcloud.moment.server.pojos.RespLikeIt;
-import org.apache.commons.lang.StringUtils;
+import com.google.common.collect.Lists;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
  * @author renchaoyang
  * @date 2021/6/9
  */
-@Transactional
 @Service
 public class LikeServiceImpl implements LikeService {
 
@@ -55,6 +51,12 @@ public class LikeServiceImpl implements LikeService {
 
     @Resource
     RedisOptService redisOptService;
+
+    @Resource
+    CacheExpireProperties expireProperties;
+
+    @Resource(name = "redisTemplate")
+    ZSetOperations zSetOperations;
 
     @Override
     public RestResult likeIt(ReqLikeIt reqLike) throws RestException {
@@ -80,8 +82,13 @@ public class LikeServiceImpl implements LikeService {
         message.setStatus(MessageStatus.NORMAL.getValue());
         messageService.saveMessage(message);
 
+        this.handleCommentCache(feedId);
+        CacheService.cacheOne(RedisKey.getLikeSetKey(feedId), RedisKey.getLikeKey(feedId), like.getLikeId(),
+                like, CacheService.date2Score(like.getCreateDt()), expireProperties.getComment());
+
+
         if (receivers != null && !receivers.isEmpty()) {
-            for (String receiverId: receivers) {
+            for (String receiverId : receivers) {
                 if (receiverId.equals(UserHolder.getUid())) {
                     continue;
                 }
@@ -112,6 +119,7 @@ public class LikeServiceImpl implements LikeService {
             throw new RestException(RestResult.generic(RestResultCode.ERR_LIKE_USER_NO_LIKE));
         }
         this.likeMapper.deleteByPrimaryKey(like.getId());
+        CacheService.uncacheOne(RedisKey.getLikeSetKey(feedId), RedisKey.getLikeKey(feedId), like.getLikeId());
     }
 
     @Override
@@ -131,15 +139,24 @@ public class LikeServiceImpl implements LikeService {
 
     @Override
     public List<Like> getLikes(String feedId, String fromLikeId, int size) {
-        Long fromAutoIncLikeId = null;
-        if (StringUtils.isNotBlank(fromLikeId)) {
-            Like like = likeMapper.selectByLikeId(fromLikeId);
-            if (Objects.isNull(like)) {
-                throw new RestException(RestResult.generic(RestResultCode.ERR_LIKE_USER_NO_LIKE));
-            }
-            fromAutoIncLikeId = like.getId();
+        String zsetKey = RedisKey.getLikeSetKey(feedId);
+        this.handleCommentCache(feedId);
+        Long index;
+        if (fromLikeId != null) {
+            index = zSetOperations.rank(zsetKey, fromLikeId);
+        } else {
+            index = 1L;
         }
-        return this.likeMapper.selectPagedLike(feedId, fromAutoIncLikeId, size);
+        List<Like> likes = Lists.newArrayList();
+        if (index == null) {
+            throw new RestException(RestResult.generic(RestResultCode.ERR_LIKE_USER_NO_LIKE));
+        } else {
+            Set keys = zSetOperations.range(zsetKey, index, size);
+            if (!CollectionUtils.isEmpty(keys)) {
+                likes = (List<Like>) Optional.ofNullable(redisOptService.hmget(RedisKey.getLikeKey(feedId), Lists.newArrayList(keys.iterator()))).map(Map::values).map(Lists::newArrayList).orElse(Lists.newArrayList());
+            }
+        }
+        return likes;
     }
 
     private Like saveLike(String feedId) {
@@ -150,6 +167,10 @@ public class LikeServiceImpl implements LikeService {
         savedLike.setLikeId(IdentifierUtils.uuid24());
         this.likeMapper.insertSelective(savedLike);
         return savedLike;
+    }
+
+    public void handleCommentCache(String feedId) {
+        CacheService.cacheHandle(RedisKey.getLikeSetKey(feedId), CacheService.getLikes, feedId, expireProperties.getComment());
     }
 
 }
