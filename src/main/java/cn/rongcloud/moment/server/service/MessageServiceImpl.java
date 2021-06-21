@@ -77,6 +77,8 @@ public class MessageServiceImpl implements MessageService {
                 return RestResult.generic(RestResultCode.ERR_MESSAGE_NOT_EXISTED);
             }
             fromMessageAutoIncId = message.getId();
+        } else {
+            optService.deleteKey(RedisKey.getUserUnreadMessageKey(UserHolder.getUid()));
         }
 
         List<Message> messages = messageMapper.getMessageByPage(UserHolder.getUid(), fromMessageAutoIncId, size);
