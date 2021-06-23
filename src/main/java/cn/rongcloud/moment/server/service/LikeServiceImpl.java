@@ -66,6 +66,10 @@ public class LikeServiceImpl implements LikeService {
         RespLikeIt respLikeIt = new RespLikeIt();
         BeanUtils.copyProperties(like, respLikeIt);
         List<String> receivers = this.commentService.getCommentNtfReceivers(feed);
+        List<String> alreadyNotifyUserIds = messageService.getLikeAlreadyNotifyUser(feedId, UserHolder.getUid());
+        if (receivers != null && alreadyNotifyUserIds != null) {
+            receivers.removeAll(alreadyNotifyUserIds);
+        }
 
         LikeNotifyData likeNotifyData = new LikeNotifyData();
         BeanUtils.copyProperties(like, likeNotifyData);

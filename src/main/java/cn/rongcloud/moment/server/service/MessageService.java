@@ -2,6 +2,7 @@ package cn.rongcloud.moment.server.service;
 
 import cn.rongcloud.moment.server.common.rest.RestResult;
 import cn.rongcloud.moment.server.model.Message;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -17,4 +18,5 @@ public interface MessageService {
     RestResult batchDelete(List<String> ids);
     RestResult deleteAll();
     void updateStatus(String messageId, Integer status);
+    List<String> getLikeAlreadyNotifyUser(String feedId, String userId);
 }

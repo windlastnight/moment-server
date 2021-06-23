@@ -78,4 +78,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         UPDATE T_MESSAGE SET STATUS = #{status} WHERE MESSAGE_ID = #{messageId}
     </update>
 
+    <select id="getLikeAlreadyNotifyUser" resultType="java.lang.String">
+        SELECT USER_ID FROM T_MESSAGE WHERE FEED_ID = #{feedId} AND PUBLISH_USER_ID = #{userId}
+    </select>
+
 </mapper>
