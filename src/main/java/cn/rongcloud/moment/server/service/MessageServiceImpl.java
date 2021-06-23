@@ -60,6 +60,7 @@ public class MessageServiceImpl implements MessageService {
         Set<Message> messages = (Set<Message>) optService.zsAll(RedisKey.getUserUnreadMessageKey(UserHolder.getUid()));
         optService.deleteKey(RedisKey.getUserUnreadMessageKey(UserHolder.getUid()));
         List<RespMessageInfo> resp = buildRespMessage(new ArrayList<>(messages));
+        Collections.reverse(resp);
         return RestResult.success(resp);
     }
 
