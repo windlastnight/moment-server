@@ -106,6 +106,7 @@
     <if test="fromLikeId != null and fromLikeId != ''">
       and  ID &gt; #{fromLikeId}
     </if>
+    order by ID ASC
     limit #{size}
   </select>
 

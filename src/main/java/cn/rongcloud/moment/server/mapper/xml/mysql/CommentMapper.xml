@@ -130,6 +130,7 @@
     <if test="fromAutoIncCommentId != null and fromAutoIncCommentId != ''">
       and  ID &gt; #{fromAutoIncCommentId}
     </if>
+    order by ID ASC
     limit #{size}
   </select>
 
