@@ -52,7 +52,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <select id="getMessage" resultMap="messageResult">
         <include refid="selectTMessageVo"/>
-        WHERE MESSAGE_ID = #{messageId}
+        WHERE MESSAGE_ID = #{messageId} AND USER_ID = #{userId}
     </select>
 
     <select id="getMessageByPage" resultMap="messageResult">
@@ -79,7 +79,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </update>
 
     <select id="getLikeAlreadyNotifyUser" resultType="java.lang.String">
-        SELECT USER_ID FROM T_MESSAGE WHERE FEED_ID = #{feedId} AND PUBLISH_USER_ID = #{userId}
+        SELECT USER_ID FROM T_MESSAGE WHERE FEED_ID = #{feedId} AND PUBLISH_USER_ID = #{userId} AND MESSAGE_TYPE = 2
     </select>
 
 </mapper>

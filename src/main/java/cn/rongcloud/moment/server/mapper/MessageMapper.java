@@ -11,7 +11,7 @@ public interface MessageMapper {
 
     int insertMessage(Message message);
 
-    Message getMessage(String messageId);
+    Message getMessage(@Param("messageId") String messageId, @Param("userId") String userId);
 
     List<Message> getMessageByPage(@Param("userId") String userId, @Param("fromMessageAutoIncId") Long fromMessageAutoIncId, @Param("size") Integer size);
 
