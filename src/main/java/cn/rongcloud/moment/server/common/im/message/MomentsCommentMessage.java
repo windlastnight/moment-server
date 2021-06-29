@@ -9,7 +9,7 @@ public class MomentsCommentMessage<T> extends BaseMessage {
 
     @Override
     public String getType() {
-        return "RC:MomentsComment";
+        return "RCE:MomentsComment";
     }
 
     private T data;
