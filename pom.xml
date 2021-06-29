@@ -115,6 +115,11 @@
             <version>1.9.4</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.gbase.jdbc</groupId>
+            <artifactId>gbase-connector-java</artifactId>
+            <version>8.8.0</version>
+        </dependency>
 
     </dependencies>
 

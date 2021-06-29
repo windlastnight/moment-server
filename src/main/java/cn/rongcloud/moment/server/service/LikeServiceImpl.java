@@ -18,6 +18,7 @@ import cn.rongcloud.moment.server.pojos.ReqLikeIt;
 import cn.rongcloud.moment.server.pojos.RespLike;
 import cn.rongcloud.moment.server.pojos.RespLikeIt;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
@@ -148,7 +149,7 @@ public class LikeServiceImpl implements LikeService {
         String zsetKey = RedisKey.getLikeSetKey(feedId);
         this.handleCommentCache(feedId);
         Long index;
-        if (fromLikeId != null) {
+        if (StringUtils.isNotBlank(fromLikeId)) {
             index = zSetOperations.rank(zsetKey, fromLikeId);
         } else {
             index = 1L;

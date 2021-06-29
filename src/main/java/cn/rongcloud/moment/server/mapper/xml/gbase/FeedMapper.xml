@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.rongcloud.moment.server.mapper.FeedMapper">
+
+    <resultMap type="cn.rongcloud.moment.server.model.Feed" id="feedResult">
+        <result property="id" column="ID"/>
+        <result property="feedId" column="FEED_ID"/>
+        <result property="userId" column="USER_ID"/>
+        <result property="feedType" column="FEED_TYPE"/>
+        <result property="feedContent" column="FEED_CONTENT"/>
+        <result property="feedStatus" column="FEED_STATUS"/>
+        <result property="createDt" column="CREATE_DT"/>
+        <result property="updateDt" column="UPDATE_DT"/>
+    </resultMap>
+
+    <sql id="selectTFeedVo">
+        SELECT ID, FEED_ID, USER_ID, FEED_TYPE, FEED_CONTENT, FEED_STATUS, CREATE_DT, UPDATE_DT FROM T_FEED
+    </sql>
+
+    <insert id="insertFeed" parameterType="cn.rongcloud.moment.server.model.Feed" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO T_FEED
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            FEED_ID,
+            USER_ID,
+            FEED_TYPE,
+            FEED_CONTENT,
+            FEED_STATUS,
+            CREATE_DT,
+            UPDATE_DT,
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            #{feedId},
+            #{userId},
+            #{feedType},
+            #{feedContent},
+            #{feedStatus},
+            #{createDt},
+            #{updateDt},
+        </trim>
+    </insert>
+
+    <select id="getFeedById" resultMap="feedResult">
+        <include refid="selectTFeedVo"/>
+        WHERE FEED_ID = #{feedId} LIMIT 1
+    </select>
+
+    <delete id="deleteFeed">
+        DELETE FROM T_FEED WHERE FEED_ID = #{feedId}
+    </delete>
+
+    <select id="getFeedsByIds" resultMap="feedResult">
+        <include refid="selectTFeedVo"/>
+        WHERE FEED_ID IN
+        <foreach item="feedId" collection="feedIds" open="(" separator="," close=")">
+            #{feedId}
+        </foreach>
+    </select>
+
+    <select id="getFeedIdsByUserId" resultType="java.lang.String">
+        SELECT FEED_ID FROM T_FEED
+        WHERE USER_ID = #{userId}
+        <if test="fromFeedAutoIncId != null"> AND ID &lt; #{fromFeedAutoIncId} </if>
+        ORDER BY ID DESC LIMIT #{size}
+    </select>
+
+</mapper>

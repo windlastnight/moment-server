@@ -173,7 +173,7 @@ public class CommentServiceImpl implements CommentService {
         handleCommentCache(feedId);
         String zsetKey = RedisKey.getCommentSetKey(feedId);
         Long index;
-        if (fromCommentId != null) {
+        if (StringUtils.isNotBlank(fromCommentId)) {
             index = zSetOperations.rank(zsetKey, fromCommentId);
         } else {
             index = 1L;
