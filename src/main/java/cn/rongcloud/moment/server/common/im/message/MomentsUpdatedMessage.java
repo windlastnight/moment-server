@@ -9,7 +9,7 @@ public class MomentsUpdatedMessage extends BaseMessage {
 
     @Override
     public String getType() {
-        return "RC:MomentsUpdate";
+        return "RCE:MomentsUpdate";
     }
 
     private Long delayPullTime;
