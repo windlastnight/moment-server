@@ -51,6 +51,13 @@ public class MessageServiceImpl implements MessageService {
         Long unreadSize = optService.zsSize(RedisKey.getUserUnreadMessageKey(UserHolder.getUid()));
         RespMessageUnreadCount resp = new RespMessageUnreadCount();
         resp.setCount(unreadSize);
+        if (unreadSize != null && unreadSize != 0) {
+            Set<Message> message = (Set<Message>) optService.zReverseRange(RedisKey.getUserUnreadMessageKey(UserHolder.getUid()), 0, 0);
+            if (message != null && !message.isEmpty()) {
+                List<RespMessageInfo> messages = buildRespMessage(new ArrayList<>(message));
+                resp.setLatestMessage(messages.get(0));
+            }
+        }
         return RestResult.success(resp);
     }
 
@@ -69,7 +76,7 @@ public class MessageServiceImpl implements MessageService {
 
         Long fromMessageAutoIncId = null;
         if (!StringUtils.isEmpty(fromMessageId)) {
-            Message message = messageMapper.getMessage(fromMessageId);
+            Message message = messageMapper.getMessage(fromMessageId, UserHolder.getUid());
             if (message == null) {
                 return RestResult.generic(RestResultCode.ERR_MESSAGE_NOT_EXISTED);
             }
@@ -137,12 +144,14 @@ public class MessageServiceImpl implements MessageService {
             respMessageInfo.setStatus(message.getStatus());
             respMessageInfo.setType(message.getMessageType());
             respMessageInfo.setCreateDt(message.getCreateDt());
-            if (message.getMessageType() == MomentsCommentType.COMMENT.getType()
-                    && commentMap.containsKey(message.getMessageId())
-                    && message.getStatus() == MessageStatus.NORMAL.getValue()) {
-                Comment comment = commentMap.get(message.getMessageId());
-                respMessageInfo.setReplyTo(comment.getReplyTo());
-                respMessageInfo.setCommentContent(comment.getCommentContent());
+            if (message.getMessageType() == MomentsCommentType.COMMENT.getType()) {
+                if (commentMap.containsKey(message.getMessageId())) {
+                    Comment comment = commentMap.get(message.getMessageId());
+                    respMessageInfo.setReplyTo(comment.getReplyTo());
+                    respMessageInfo.setCommentContent(comment.getCommentContent());
+                } else {
+                    respMessageInfo.setStatus(MessageStatus.DELETED.getValue());
+                }
             }
             resp.add(respMessageInfo);
         }

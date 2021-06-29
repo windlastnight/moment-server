@@ -231,6 +231,10 @@ public class RedisOptService {
         return zSetOperations.size(key);
     }
 
+    public Object zReverseRange(String key, long start, long end) {
+        return zSetOperations.reverseRange(key, start, end);
+    }
+
     public Object zReverseRangeByScore(String key, double start, double end) {
         return zSetOperations.reverseRangeByScore(key, start, end);
     }
