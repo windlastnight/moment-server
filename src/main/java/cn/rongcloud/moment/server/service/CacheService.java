@@ -11,10 +11,7 @@ import com.google.common.collect.Sets;
 import org.springframework.data.redis.core.DefaultTypedTuple;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -64,13 +61,15 @@ public class CacheService {
         return cachedData;
     };
 
-    public static void cacheHandle(String cacheKey, BiFunction<String, Long, Set<DefaultTypedTuple>> cacheFun, String feedId, long expire) {
+    public static void cacheHandle(String cacheKey, BiFunction<String, Long, Set<DefaultTypedTuple>> cacheFun, String feedId, Long expire) {
         RedisOptService redisOptService = getRedisOptService();
         boolean hasKey = redisOptService.hasKey(cacheKey);
         if (!hasKey) {
             Set<DefaultTypedTuple> cacheData = cacheFun.apply(feedId, expire);
             redisOptService.add(cacheKey, cacheData);
-            redisOptService.expire(cacheKey, expire);
+            if (Objects.nonNull(expire) && expire > 0 ) {
+                redisOptService.expire(cacheKey, expire);
+            }
         }
     }
 
