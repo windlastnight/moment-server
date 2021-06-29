@@ -37,8 +37,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         WHERE FEED_ID = #{feedId} ORDER BY ID DESC limit 1
     </select>
 
-    <select id="getTimeline" resultType="java.lang.String">
-        SELECT DISTINCT FEED_ID FROM T_TIMELINE
+    <select id="getTimeline" resultMap="timelineResult">
+        SELECT DISTINCT FEED_ID, ID FROM T_TIMELINE
         WHERE ORG_ID IN
         <foreach item="orgId" collection="orgIds" open="(" separator="," close=")">
             #{orgId}
