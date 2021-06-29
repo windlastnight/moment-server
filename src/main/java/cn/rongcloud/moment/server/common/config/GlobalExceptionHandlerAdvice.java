@@ -7,6 +7,7 @@ package cn.rongcloud.moment.server.common.config;
 import cn.rongcloud.moment.server.common.rest.RestException;
 import cn.rongcloud.moment.server.common.rest.RestResult;
 import cn.rongcloud.moment.server.common.rest.RestResultCode;
+import cn.rongcloud.moment.server.common.utils.GsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
@@ -94,6 +95,7 @@ public class GlobalExceptionHandlerAdvice {
     @ExceptionHandler(RestException.class)
     public RestResult handleMiMicroAPIException(RestException ex) {
 //        logException(ex);
+        log.error("catch business excption:{}", GsonUtil.toJson(ex.getRestResult()));
         return ex.getRestResult();
     }
 

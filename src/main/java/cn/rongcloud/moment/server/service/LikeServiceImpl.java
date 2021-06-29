@@ -64,6 +64,10 @@ public class LikeServiceImpl implements LikeService {
         Feed feed = this.feedService.checkFeedExists(feedId);
         checkUserLikeFeed(feedId);
         Like like = this.saveLike(feedId);
+        this.handleCommentCache(feedId);
+        CacheService.cacheOne(RedisKey.getLikeSetKey(feedId), RedisKey.getLikeKey(feedId), like.getLikeId(),
+                like, CacheService.date2Score(like.getCreateDt()), expireProperties.getComment());
+
         RespLikeIt respLikeIt = new RespLikeIt();
         BeanUtils.copyProperties(like, respLikeIt);
         List<String> receivers = this.commentService.getCommentNtfReceivers(feed);
