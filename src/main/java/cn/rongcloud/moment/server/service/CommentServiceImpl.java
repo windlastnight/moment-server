@@ -193,7 +193,7 @@ public class CommentServiceImpl implements CommentService {
     private void checkCommentUserExists(String feedId, String userId) {
         Comment comment = this.commentMapper.selectLastUserCommet(feedId, userId);
         if (Objects.isNull(comment)) {
-            throw new RestException(RestResult.generic(RestResultCode.ERR_FEED_NOT_EXISTED));
+            throw new RestException(RestResult.generic(RestResultCode.ERR_COMMENT_NOT_EXISTED));
         }
     }
 

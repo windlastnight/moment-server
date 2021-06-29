@@ -263,6 +263,9 @@ public class FeedServiceImpl implements FeedService {
         Feed feed = (Feed) this.redisOptService.hashGet(feedKey, feedId);
         if (feed == null) {
             feed = feedMapper.getFeedById(feedId);
+            if (feed == null){
+                throw new RestException(RestResult.generic(RestResultCode.ERR_FEED_NOT_EXISTED));
+            }
             if (needCache(feed.getUpdateDt())) {
                 CacheService.cacheOne(feedSetKey, feedKey, feedId, feed, Double.valueOf(String.valueOf(feed.getUpdateDt().getTime())), null);
             }
