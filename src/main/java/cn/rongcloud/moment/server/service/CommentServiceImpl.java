@@ -160,7 +160,7 @@ public class CommentServiceImpl implements CommentService {
         this.feedService.checkFeedExists(feedId);
         List<Comment> comments = getComments(feedId, page.getFromUId(), page.getSize());
 
-        List<RespComment> res = comments.stream().map(cm -> {
+        List<RespComment> res = comments.stream().sorted(Comparator.comparing(Comment::getCreateDt)).map(cm -> {
             RespComment respComment = new RespComment();
             BeanUtils.copyProperties(cm, respComment);
             return respComment;

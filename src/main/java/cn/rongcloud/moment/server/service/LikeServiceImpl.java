@@ -135,7 +135,7 @@ public class LikeServiceImpl implements LikeService {
 
         List<Like> likes = getLikes(fid, page.getFromUId(), page.getSize());
 
-        List<RespLike> res = likes.stream().map(cm -> {
+        List<RespLike> res = likes.stream().sorted(Comparator.comparing(Like::getCreateDt)).map(cm -> {
             RespLike respLike = new RespLike();
             BeanUtils.copyProperties(cm, respLike);
             return respLike;
