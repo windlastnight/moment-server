@@ -108,6 +108,19 @@
             <version>2.0.1</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/commons-beanutils/commons-beanutils -->
+        <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+            <version>1.9.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.gbase.jdbc</groupId>
+            <artifactId>gbase-connector-java</artifactId>
+            <version>8.8.0</version>
+        </dependency>
+
     </dependencies>
 
     <build>
