@@ -54,8 +54,8 @@ public class MessageServiceImpl implements MessageService {
         if (unreadSize != null && unreadSize != 0) {
             Set<Message> message = (Set<Message>) optService.zReverseRange(RedisKey.getUserUnreadMessageKey(UserHolder.getUid()), 0, 0);
             if (message != null && !message.isEmpty()) {
-                List<Message> messageList = new ArrayList<>(message);
-                resp.setLatestMessage(messageList.get(0));
+                List<RespMessageInfo> messages = buildRespMessage(new ArrayList<>(message));
+                resp.setLatestMessage(messages.get(0));
             }
         }
         return RestResult.success(resp);
