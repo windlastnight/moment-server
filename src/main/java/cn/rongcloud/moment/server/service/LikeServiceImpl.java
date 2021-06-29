@@ -67,33 +67,35 @@ public class LikeServiceImpl implements LikeService {
         RespLikeIt respLikeIt = new RespLikeIt();
         BeanUtils.copyProperties(like, respLikeIt);
         List<String> receivers = this.commentService.getCommentNtfReceivers(feed);
+        List<String> alreadyNotifyUserIds = messageService.getLikeAlreadyNotifyUser(feedId, UserHolder.getUid());
+        if (receivers != null && alreadyNotifyUserIds != null) {
+            receivers.removeAll(alreadyNotifyUserIds);
+        }
 
         LikeNotifyData likeNotifyData = new LikeNotifyData();
         BeanUtils.copyProperties(like, likeNotifyData);
         likeNotifyData.setCreateDt(like.getCreateDt().getTime());
         this.imHelper.publishCommentNtf(receivers, likeNotifyData, MomentsCommentType.LIKE);
 
-        Message message = new Message();
-        message.setFeedId(feedId);
-        message.setMessageId(like.getLikeId());
-        message.setUserId(UserHolder.getUid());
-        message.setCreateDt(like.getCreateDt());
-        message.setMessageType(MomentsCommentType.LIKE.getType());
-        message.setStatus(MessageStatus.NORMAL.getValue());
-        messageService.saveMessage(message);
-
-        this.handleCommentCache(feedId);
-        CacheService.cacheOne(RedisKey.getLikeSetKey(feedId), RedisKey.getLikeKey(feedId), like.getLikeId(),
-                like, CacheService.date2Score(like.getCreateDt()), expireProperties.getComment());
-
-
         if (receivers != null && !receivers.isEmpty()) {
-            for (String receiverId : receivers) {
+
+            List<Message> messages = new ArrayList<>();
+            for (String receiverId: receivers) {
                 if (receiverId.equals(UserHolder.getUid())) {
                     continue;
                 }
+                Message message = new Message();
+                message.setFeedId(feedId);
+                message.setMessageId(like.getLikeId());
+                message.setUserId(receiverId);
+                message.setPublishUserId(UserHolder.getUid());
+                message.setCreateDt(like.getCreateDt());
+                message.setMessageType(MomentsCommentType.LIKE.getType());
+                message.setStatus(MessageStatus.NORMAL.getValue());
+                messages.add(message);
                 redisOptService.zsAdd(RedisKey.getUserUnreadMessageKey(receiverId), message, like.getCreateDt().getTime());
             }
+            messageService.saveMessage(messages);
         }
 
         return RestResult.success(respLikeIt);

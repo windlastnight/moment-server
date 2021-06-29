@@ -34,7 +34,8 @@ public class MomentPublishNotifyJob {
                     "end\n" +
                     "return current;";
 
-    @Scheduled(cron = "0 */3 * * * ?")
+    //@Scheduled(cron = "0 */3 * * * ?")
+    @Scheduled(cron = "*/5 * * * * ?")
     public void publishNotify() {
         log.info("moment publish notify job start...");
         List<String> keys = new ArrayList<>();

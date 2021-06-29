@@ -11,11 +11,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="userId" column="USER_ID"/>
         <result property="messageType" column="MESSAGE_TYPE"/>
         <result property="createDt" column="CREATE_DT"/>
+        <result property="publishUserId" column="PUBLISH_USER_ID"/>
         <result property="status" column="STATUS"/>
     </resultMap>
 
     <sql id="selectTMessageVo">
-        SELECT ID, MESSAGE_ID, FEED_ID, USER_ID, MESSAGE_TYPE, CREATE_DT, STATUS FROM T_MESSAGE
+        SELECT ID, MESSAGE_ID, FEED_ID, USER_ID, MESSAGE_TYPE, CREATE_DT, STATUS, PUBLISH_USER_ID FROM T_MESSAGE
     </sql>
 
     <insert id="insertMessage" parameterType="cn.rongcloud.moment.server.model.Message" useGeneratedKeys="true" keyProperty="id">
@@ -26,7 +27,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             USER_ID,
             MESSAGE_TYPE,
             CREATE_DT,
-            STATUS
+            STATUS,
+            PUBLISH_USER_ID,
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             #{messageId},
@@ -35,8 +37,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{messageType},
             #{createDt},
             #{status},
+            #{publishUserId}
         </trim>
     </insert>
+
+    <insert id="batchInsertMessage">
+        INSERT INTO T_MESSAGE (MESSAGE_ID, FEED_ID, USER_ID, MESSAGE_TYPE, CREATE_DT, STATUS, PUBLISH_USER_ID) VALUES
+        <foreach collection ="messages" item="message" separator =",">
+            (#{message.messageId}, #{message.feedId}, #{message.userId}, #{message.messageType}, #{message.createDt}, #{message.status}, #{message.publishUserId})
+        </foreach >
+    </insert>
+
+
 
     <select id="getMessage" resultMap="messageResult">
         <include refid="selectTMessageVo"/>
@@ -46,7 +58,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="getMessageByPage" resultMap="messageResult">
         <include refid="selectTMessageVo"/>
         WHERE USER_ID = #{userId}
-        <if test="fromMessageAutoIncId != null"> AND ID &lt; #{fromTimelineAutoIncId} </if>
+        <if test="fromMessageAutoIncId != null"> AND ID &lt; #{fromMessageAutoIncId} </if>
         ORDER BY ID DESC LIMIT #{size}
     </select>
 
@@ -61,5 +73,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <delete id="deleteAll">
         DELETE FROM T_MESSAGE WHERE USER_ID = #{userId}
     </delete>
+
+    <update id="updateStatus">
+        UPDATE T_MESSAGE SET STATUS = #{status} WHERE MESSAGE_ID = #{messageId}
+    </update>
+
+    <select id="getLikeAlreadyNotifyUser" resultType="java.lang.String">
+        SELECT USER_ID FROM T_MESSAGE WHERE FEED_ID = #{feedId} AND PUBLISH_USER_ID = #{userId}
+    </select>
 
 </mapper>

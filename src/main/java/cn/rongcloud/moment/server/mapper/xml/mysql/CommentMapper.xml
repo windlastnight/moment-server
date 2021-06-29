@@ -130,6 +130,7 @@
     <if test="fromAutoIncCommentId != null and fromAutoIncCommentId != ''">
       and  ID &gt; #{fromAutoIncCommentId}
     </if>
+    order by ID ASC
     <if test="size != null">
     limit #{size}
     </if>

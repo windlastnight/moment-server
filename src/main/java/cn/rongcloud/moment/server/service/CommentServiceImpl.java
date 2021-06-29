@@ -87,21 +87,24 @@ public class CommentServiceImpl implements CommentService {
         commentNotifyData.setCreateDt(comment.getCreateDt().getTime());
         this.imHelper.publishCommentNtf(receivers, commentNotifyData, MomentsCommentType.COMMENT);
 
-        Message message = new Message();
-        message.setFeedId(feed.getFeedId());
-        message.setMessageId(comment.getCommentId());
-        message.setUserId(UserHolder.getUid());
-        message.setCreateDt(comment.getCreateDt());
-        message.setMessageType(MomentsCommentType.COMMENT.getType());
-        message.setStatus(MessageStatus.NORMAL.getValue());
-//        messageService.saveMessage(message);
         if (receivers != null && !receivers.isEmpty()) {
-            for (String receiverId : receivers) {
+            List<Message> messages = new ArrayList<>();
+            for (String receiverId: receivers) {
                 if (receiverId.equals(UserHolder.getUid())) {
                     continue;
                 }
+                Message message = new Message();
+                message.setFeedId(feed.getFeedId());
+                message.setMessageId(comment.getCommentId());
+                message.setPublishUserId(UserHolder.getUid());
+                message.setUserId(receiverId);
+                message.setCreateDt(comment.getCreateDt());
+                message.setMessageType(MomentsCommentType.COMMENT.getType());
+                message.setStatus(MessageStatus.NORMAL.getValue());
+                messages.add(message);
                 redisOptService.zsAdd(RedisKey.getUserUnreadMessageKey(receiverId), message, comment.getCreateDt().getTime());
             }
+            messageService.saveMessage(messages);
         }
 
         RespCreateComment respCreateComment = new RespCreateComment();
@@ -148,6 +151,7 @@ public class CommentServiceImpl implements CommentService {
             throw new RestException(RestResult.generic(RestResultCode.ERR_FEED_NOT_EXISTED));
         }
         this.commentMapper.deleteByPrimaryKey(comment.getId());
+        messageService.updateStatus(commentId, MessageStatus.DELETED.getValue());
         CacheService.uncacheOne(RedisKey.getCommentSetKey(feedId), RedisKey.getCommentKey(feedId), commentId);
     }
 

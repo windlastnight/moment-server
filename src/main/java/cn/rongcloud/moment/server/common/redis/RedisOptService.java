@@ -234,6 +234,9 @@ public class RedisOptService {
     public Object zReverseRangeByScore(String key, double start, double end) {
         return zSetOperations.reverseRangeByScore(key, start, end);
     }
+    public Object zsAll(String key) {
+        return zSetOperations.range(key, 0, -1);
+    }
 
     public long batchDel(List<String> keys){
         return redisTemplate.delete(keys);

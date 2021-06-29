@@ -18,10 +18,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -45,8 +42,8 @@ public class MessageServiceImpl implements MessageService {
     private LikeService likeService;
 
     @Override
-    public void saveMessage(Message message) {
-        messageMapper.insertMessage(message);
+    public void saveMessage(List<Message> messages) {
+        messageMapper.batchInsertMessage(messages);
     }
 
     @Override
@@ -60,10 +57,10 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public RestResult getUnread() {
 
-        List<Message> messages = (List<Message>) optService.zReverseRangeByScore(RedisKey.getUserUnreadMessageKey(UserHolder.getUid()), 0, -1);
+        Set<Message> messages = (Set<Message>) optService.zsAll(RedisKey.getUserUnreadMessageKey(UserHolder.getUid()));
         optService.deleteKey(RedisKey.getUserUnreadMessageKey(UserHolder.getUid()));
-        List<RespMessageInfo> resp = buildRespMessage(messages);
-
+        List<RespMessageInfo> resp = buildRespMessage(new ArrayList<>(messages));
+        Collections.reverse(resp);
         return RestResult.success(resp);
     }
 
@@ -77,6 +74,8 @@ public class MessageServiceImpl implements MessageService {
                 return RestResult.generic(RestResultCode.ERR_MESSAGE_NOT_EXISTED);
             }
             fromMessageAutoIncId = message.getId();
+        } else {
+            optService.deleteKey(RedisKey.getUserUnreadMessageKey(UserHolder.getUid()));
         }
 
         List<Message> messages = messageMapper.getMessageByPage(UserHolder.getUid(), fromMessageAutoIncId, size);
@@ -98,6 +97,16 @@ public class MessageServiceImpl implements MessageService {
     public RestResult deleteAll() {
         messageMapper.deleteAll(UserHolder.getUid());
         return RestResult.success();
+    }
+
+    @Override
+    public void updateStatus(String messageId, Integer status) {
+        messageMapper.updateStatus(status, messageId);
+    }
+
+    @Override
+    public List<String> getLikeAlreadyNotifyUser(String feedId, String userId) {
+        return messageMapper.getLikeAlreadyNotifyUser(feedId, userId);
     }
 
     private List<RespMessageInfo> buildRespMessage(List<Message> messages) {
@@ -124,7 +133,7 @@ public class MessageServiceImpl implements MessageService {
             RespMessageInfo respMessageInfo = new RespMessageInfo();
             respMessageInfo.setFeedId(message.getFeedId());
             respMessageInfo.setMessageId(message.getMessageId());
-            respMessageInfo.setUserId(message.getUserId());
+            respMessageInfo.setUserId(message.getPublishUserId());
             respMessageInfo.setStatus(message.getStatus());
             respMessageInfo.setType(message.getMessageType());
             respMessageInfo.setCreateDt(message.getCreateDt());

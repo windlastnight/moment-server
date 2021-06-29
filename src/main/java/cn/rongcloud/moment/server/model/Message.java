@@ -10,6 +10,7 @@ public class Message {
     private String messageId;
     private String feedId;
     private Integer messageType;
+    private String publishUserId;
     private String userId;
     private Integer status;
     private Date createDt;

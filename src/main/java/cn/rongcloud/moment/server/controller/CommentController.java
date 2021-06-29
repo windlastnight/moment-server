@@ -53,25 +53,4 @@ public class CommentController {
         return this.commentService.getPagedComments(fid, page);
     }
 
-    @PostMapping("/expire")
-    public RestResult getExpire(){
-        RedisTemplate.class.cast(ApplicationUtil.getBean("redisTemplate")).expire("test", 1 , TimeUnit.MINUTES);
-        return RestResult.success();
-    }
-    @PostMapping("/cache")
-    public RestResult cache(){
-        Comment c1 = new Comment();
-        c1.setCommentId("001");
-        Comment c2 = new Comment();
-        c2.setCommentId("002");
-        Comment c3 = new Comment();
-        c3.setCommentId("003");
-        Comment c4 = new Comment();
-        c4.setCommentId("004");
-        Set<DefaultTypedTuple> tuples = Lists.newArrayList(c1, c2, c3, c4).stream().map(cm -> new DefaultTypedTuple(cm, 0d)).collect(Collectors.toSet());
-        RedisTemplate.class.cast(ApplicationUtil.getBean("redisTemplate")).opsForZSet().add("testtuples", tuples);
-        return RestResult.success();
-    }
-
-
 }
