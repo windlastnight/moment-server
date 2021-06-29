@@ -171,6 +171,10 @@ public class RedisOptService {
         return setOperations.remove(key, values);
     }
 
+    public long zsetRemove(String key, Object... values) {
+        return zSetOperations.remove(key, values);
+    }
+
     //===============================list=================================
 
     public List<Object> lGet(String key, long start, long end) {

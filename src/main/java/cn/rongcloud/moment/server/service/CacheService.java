@@ -85,7 +85,7 @@ public class CacheService {
 
     public static void uncacheOne(String zsetKey, String infoKey, String id) {
         RedisOptService redisOptService = getRedisOptService();
-        redisOptService.setRemove(zsetKey, id);
+        redisOptService.zsetRemove(zsetKey, id);
         redisOptService.hashDelete(infoKey, id);
     }
 
