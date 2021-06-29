@@ -160,7 +160,7 @@ public class CommentServiceImpl implements CommentService {
         this.feedService.checkFeedExists(feedId);
         List<Comment> comments = getComments(feedId, page.getFromUId(), page.getSize());
 
-        List<RespComment> res = comments.stream().sorted(Comparator.comparing(Comment::getCreateDt)).map(cm -> {
+        List<RespComment> res = comments.stream().map(cm -> {
             RespComment respComment = new RespComment();
             BeanUtils.copyProperties(cm, respComment);
             return respComment;
@@ -187,6 +187,8 @@ public class CommentServiceImpl implements CommentService {
                 comments = (List<Comment>) Optional.ofNullable(redisOptService.hmget(RedisKey.getCommentKey(feedId), Lists.newArrayList(keys.iterator()))).map(Map::values).map(Lists::newArrayList).orElse(Lists.newArrayList());
             }
         }
+//        返回顺序
+        Collections.sort(comments, Comparator.comparing(Comment::getCreateDt));
         return comments;
     }
 

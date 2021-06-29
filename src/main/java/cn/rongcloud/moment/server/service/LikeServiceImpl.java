@@ -135,7 +135,7 @@ public class LikeServiceImpl implements LikeService {
 
         List<Like> likes = getLikes(fid, page.getFromUId(), page.getSize());
 
-        List<RespLike> res = likes.stream().sorted(Comparator.comparing(Like::getCreateDt)).map(cm -> {
+        List<RespLike> res = likes.stream().map(cm -> {
             RespLike respLike = new RespLike();
             BeanUtils.copyProperties(cm, respLike);
             return respLike;
@@ -162,6 +162,7 @@ public class LikeServiceImpl implements LikeService {
                 likes = (List<Like>) Optional.ofNullable(redisOptService.hmget(RedisKey.getLikeKey(feedId), Lists.newArrayList(keys.iterator()))).map(Map::values).map(Lists::newArrayList).orElse(Lists.newArrayList());
             }
         }
+        Collections.sort(likes, Comparator.comparing(Like::getCreateDt));
         return likes;
     }
 
