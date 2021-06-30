@@ -8,6 +8,7 @@ import cn.rongcloud.moment.server.common.utils.UserHolder;
 import cn.rongcloud.moment.server.mapper.FeedMapper;
 import cn.rongcloud.moment.server.mapper.TimelineMapper;
 import cn.rongcloud.moment.server.model.Feed;
+import cn.rongcloud.moment.server.model.Timeline;
 import cn.rongcloud.moment.server.pojos.RespTimeline;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 /**
@@ -35,7 +37,7 @@ public class TimelineServiceImpl implements TimelineService {
 
     @Override
     public RestResult getTimeLine(String fromFeedId, Integer size) {
-        List<String> timelines = null;
+        List<String> timelines = new ArrayList<>();
 
         Long fromTimelineAutoIncId = null;
         if (!StringUtils.isEmpty(fromFeedId)) {
@@ -51,10 +53,9 @@ public class TimelineServiceImpl implements TimelineService {
         }
 
         List<String> orgIds = rceQueryResult.getResult();
-        if (orgIds == null || orgIds.isEmpty()) {
-            timelines = new ArrayList<>();
-        } else {
-            timelines = timelineMapper.getTimeline(orgIds, fromTimelineAutoIncId, size);
+        if (orgIds != null && !orgIds.isEmpty()) {
+            List<Timeline> timelineList = timelineMapper.getTimeline(orgIds, fromTimelineAutoIncId, size);
+            timelines = timelineList.stream().map(Timeline::getFeedId).collect(Collectors.toList());
         }
 
         RespTimeline respTimeline = new RespTimeline();

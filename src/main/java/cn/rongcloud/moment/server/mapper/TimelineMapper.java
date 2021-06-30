@@ -15,7 +15,7 @@ public interface TimelineMapper {
     Long getMinTimelineIdByFeedId(@Param("feedId") String feedId);
     Long getMaxTimelineIdByFeedId(@Param("feedId") String feedId);
 
-    List<String> getTimeline(@Param("orgIds") List<String> orgIds, @Param("fromTimelineAutoIncId") Long fromTimelineAutoIncId, @Param("size") Integer size);
+    List<Timeline> getTimeline(@Param("orgIds") List<String> orgIds, @Param("fromTimelineAutoIncId") Long fromTimelineAutoIncId, @Param("size") Integer size);
 
     String getNewFeed(@Param("orgIds") List<String> orgIds, @Param("fromTimelineAutoIncId") Long fromTimelineAutoIncId);
 }
