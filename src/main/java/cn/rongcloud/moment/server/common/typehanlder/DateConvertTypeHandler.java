@@ -12,10 +12,9 @@ import java.util.Date;
 
 /**
  * @author Clinton Begin
+ *  转化后的数据类型
  */
 public class DateConvertTypeHandler extends BaseTypeHandler<Date> {
-
-    String dbName = ApplicationUtil.getBean(Environment.class).getProperty("db.name");
 
     @Override
     public void setNonNullParameter(PreparedStatement ps, int i, Date parameter, JdbcType jdbcType)
@@ -26,7 +25,7 @@ public class DateConvertTypeHandler extends BaseTypeHandler<Date> {
     @Override
     public Date getNullableResult(ResultSet rs, String columnName)
             throws SQLException {
-
+        String dbName = ApplicationUtil.getBean(Environment.class).getProperty("db.name");
         if (dbName.equals("gbase")) {
             String sqlTimestamp = rs.getString(columnName);
             if (sqlTimestamp != null) {
