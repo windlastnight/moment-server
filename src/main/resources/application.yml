@@ -82,6 +82,12 @@ moment:
     delay_pull_time: 0
   moment_update:
     delay_pull_time: 300
+  clear_msg:
+    interval_days: 30
+    cron: * * 2 1/1 * ? *
 
 swagger2:
   enable: true
+#mybatis:
+#  configuration:
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

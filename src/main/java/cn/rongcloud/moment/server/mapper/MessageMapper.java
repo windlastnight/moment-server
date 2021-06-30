@@ -4,6 +4,7 @@ import cn.rongcloud.moment.server.model.Message;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Date;
 import java.util.List;
 
 @Mapper
@@ -24,4 +25,6 @@ public interface MessageMapper {
     void updateStatus(@Param("status") Integer status, @Param("messageId") String messageId);
 
     List<String> getLikeAlreadyNotifyUser(@Param("feedId") String feedId, @Param("userId") String userId);
+
+    void delMsgBeforeDate(Date date);
 }
