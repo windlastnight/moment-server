@@ -1,6 +1,8 @@
 package cn.rongcloud.moment.server.jobs;
 
 import cn.rongcloud.moment.server.common.im.IMHelper;
+import cn.rongcloud.moment.server.common.rce.RceHelper;
+import cn.rongcloud.moment.server.common.rce.RceRespResult;
 import cn.rongcloud.moment.server.common.redis.RedisKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,9 @@ public class MomentPublishNotifyJob {
     @Autowired
     private IMHelper imHelper;
 
+    @Autowired
+    private RceHelper rceHelper;
+
     /**
      * Lua脚本 (获取后删除)
      */
@@ -34,8 +39,8 @@ public class MomentPublishNotifyJob {
                     "end\n" +
                     "return current;";
 
-    //@Scheduled(cron = "0 */3 * * * ?")
-    @Scheduled(cron = "*/5 * * * * ?")
+    @Scheduled(cron = "0 */3 * * * ?")
+    //@Scheduled(cron = "*/5 * * * * ?")
     public void publishNotify() {
         log.info("moment publish notify job start...");
         List<String> keys = new ArrayList<>();
@@ -43,8 +48,9 @@ public class MomentPublishNotifyJob {
         RedisScript<List> luaScript = new DefaultRedisScript<>(LUA_SCRIPT_GET_AND_DELETE, List.class);
         List result = redisTemplate.execute(luaScript, keys);
         if (result != null && !result.isEmpty()) {
-            List<String> staffIds = (List<String>) result.get(0);
-            imHelper.publishFeedNtf(staffIds);
+            List<String> orgIds = (List<String>) result.get(0);
+            RceRespResult staffIds = rceHelper.queryAllStaffId(orgIds, null);
+            imHelper.publishFeedNtf(staffIds.getResult());
         }
         log.info("moment publish notify job end...");
     }

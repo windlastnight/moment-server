@@ -60,21 +60,24 @@ public class FeedServiceImpl implements FeedService {
     @Override
     public RestResult publish(String userId, ReqFeedPublish data) {
         //从 RCE 获取部门下所有员工 Id
-        RceRespResult result = rceHelper.queryAllStaffId(data.getOrgIds(), userId);
-        if (!result.isSuccess()) {
+        RceRespResult result = rceHelper.queryStaffOrgIds(userId);
+        List<String> orgIds = result.getResult();
+        if (orgIds == null || orgIds.isEmpty()) {
             return RestResult.generic(RestResultCode.ERR_FEED_PUBLISH_ORG_ID_ERROR);
+        }
+
+        for (String inputOrgId: data.getOrgIds()) {
+            if (!orgIds.contains(inputOrgId)) {
+                return RestResult.generic(RestResultCode.ERR_FEED_PUBLISH_ORG_ID_ERROR);
+            }
         }
 
         //动态存储
         Feed feed = new Feed();
         saveFeed(userId, data, feed);
 
-        //将发布者排除，动态发布不通知发布者
-        List<String> staffIds = result.getResult();
-        staffIds.remove(userId);
-
         //将 feed 存储至队列,定时通知
-        redisOptService.setAdd(RedisKey.getMomentPublishNotifyUsersKey(), staffIds);
+        redisOptService.setAdd(RedisKey.getMomentPublishNotifyUsersKey(), data.getOrgIds());
 
         //返回数据封装
         RespFeedPublish resp = new RespFeedPublish();
