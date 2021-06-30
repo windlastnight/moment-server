@@ -112,8 +112,8 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public List<String> getLikeAlreadyNotifyUser(String feedId, String userId) {
-        return messageMapper.getLikeAlreadyNotifyUser(feedId, userId);
+    public List<String> getLikeAlreadyNotifyUser(String messageId, String userId) {
+        return messageMapper.getLikeAlreadyNotifyUser(messageId, userId);
     }
 
     private List<RespMessageInfo> buildRespMessage(List<Message> messages) {

@@ -20,6 +20,7 @@ import cn.rongcloud.moment.server.pojos.Paged;
 import cn.rongcloud.moment.server.pojos.ReqCreateComment;
 import cn.rongcloud.moment.server.pojos.RespComment;
 import cn.rongcloud.moment.server.pojos.RespCreateComment;
+import cn.rongcloud.moment.server.service.asyncTask.PublishCommentTask;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -55,6 +56,9 @@ public class CommentServiceImpl implements CommentService {
     RedisOptService redisOptService;
 
     @Resource
+    PublishCommentTask publishCommentTask;
+
+    @Resource
     IMHelper imHelper;
 
     @Override
@@ -76,30 +80,8 @@ public class CommentServiceImpl implements CommentService {
         this.commentMapper.insertSelective(comment);
 
         List<String> receivers = this.getCommentNtfReceivers(feed);
-        CommentNotifyData commentNotifyData = new CommentNotifyData();
-        BeanUtils.copyProperties(comment, commentNotifyData);
-        commentNotifyData.setCreateDt(comment.getCreateDt().getTime());
-        this.imHelper.publishCommentNtf(receivers, commentNotifyData, MomentsCommentType.COMMENT);
 
-        if (receivers != null && !receivers.isEmpty()) {
-            List<Message> messages = new ArrayList<>();
-            for (String receiverId: receivers) {
-                if (receiverId.equals(UserHolder.getUid())) {
-                    continue;
-                }
-                Message message = new Message();
-                message.setFeedId(feed.getFeedId());
-                message.setMessageId(comment.getCommentId());
-                message.setPublishUserId(UserHolder.getUid());
-                message.setUserId(receiverId);
-                message.setCreateDt(comment.getCreateDt());
-                message.setMessageType(MomentsCommentType.COMMENT.getType());
-                message.setStatus(MessageStatus.NORMAL.getValue());
-                messages.add(message);
-                redisOptService.zsAdd(RedisKey.getUserUnreadMessageKey(receiverId), message, comment.getCreateDt().getTime());
-            }
-            messageService.saveMessage(messages);
-        }
+        publishCommentTask.commentTask(comment, receivers);
 
         RespCreateComment respCreateComment = new RespCreateComment();
         BeanUtils.copyProperties(comment, respCreateComment);

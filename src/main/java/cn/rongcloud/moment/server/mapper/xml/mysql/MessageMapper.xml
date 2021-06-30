@@ -79,7 +79,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </update>
 
     <select id="getLikeAlreadyNotifyUser" resultType="java.lang.String">
-        SELECT USER_ID FROM T_MESSAGE WHERE FEED_ID = #{feedId} AND PUBLISH_USER_ID = #{userId} AND MESSAGE_TYPE = 2
+        SELECT USER_ID FROM T_MESSAGE WHERE MESSAGE_ID = #{messageId} AND PUBLISH_USER_ID = #{userId}
     </select>
 
     <delete id="delMsgBeforeDate">

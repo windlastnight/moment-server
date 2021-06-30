@@ -24,7 +24,7 @@ public interface MessageMapper {
 
     void updateStatus(@Param("status") Integer status, @Param("messageId") String messageId);
 
-    List<String> getLikeAlreadyNotifyUser(@Param("feedId") String feedId, @Param("userId") String userId);
+    List<String> getLikeAlreadyNotifyUser(@Param("messageId") String messageId, @Param("userId") String userId);
 
     void delMsgBeforeDate(Date date);
 }

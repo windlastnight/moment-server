@@ -14,6 +14,8 @@ public class Like {
 
     private String userId;
 
+    private Integer likeStatus;
+
     private Date createDt;
 
 }

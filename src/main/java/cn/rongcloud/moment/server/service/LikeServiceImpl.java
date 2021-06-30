@@ -9,6 +9,7 @@ import cn.rongcloud.moment.server.common.rest.RestResultCode;
 import cn.rongcloud.moment.server.common.utils.DateTimeUtils;
 import cn.rongcloud.moment.server.common.utils.IdentifierUtils;
 import cn.rongcloud.moment.server.common.utils.UserHolder;
+import cn.rongcloud.moment.server.enums.LikeStatus;
 import cn.rongcloud.moment.server.enums.MessageStatus;
 import cn.rongcloud.moment.server.enums.MomentsCommentType;
 import cn.rongcloud.moment.server.mapper.LikeMapper;
@@ -20,6 +21,8 @@ import cn.rongcloud.moment.server.pojos.Paged;
 import cn.rongcloud.moment.server.pojos.ReqLikeIt;
 import cn.rongcloud.moment.server.pojos.RespLike;
 import cn.rongcloud.moment.server.pojos.RespLikeIt;
+import cn.rongcloud.moment.server.service.asyncTask.PublishCommentTask;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -37,6 +40,7 @@ import java.util.stream.Collectors;
  */
 @Transactional
 @Service
+@Slf4j
 public class LikeServiceImpl implements LikeService {
 
     @Resource
@@ -57,58 +61,44 @@ public class LikeServiceImpl implements LikeService {
     @Resource
     RedisOptService redisOptService;
 
+    @Resource
+    PublishCommentTask publishCommentTask;
+
     @Override
     public RestResult likeIt(ReqLikeIt reqLike) throws RestException {
         String feedId = reqLike.getFeedId();
         Feed feed = this.feedService.checkFeedExists(feedId);
-        checkUserLikeFeed(feedId);
-        Like like = this.saveLike(feedId);
+        Like like = checkUserLikeFeed(feedId);
+        if (like == null) {
+            like = this.saveLike(feedId);
+        } else {
+            updateLikeStatus(LikeStatus.NORMAL.getValue(), like.getId());
+        }
+
         RespLikeIt respLikeIt = new RespLikeIt();
         BeanUtils.copyProperties(like, respLikeIt);
         List<String> receivers = this.commentService.getCommentNtfReceivers(feed);
-        List<String> alreadyNotifyUserIds = messageService.getLikeAlreadyNotifyUser(feedId, UserHolder.getUid());
-        if (receivers != null && alreadyNotifyUserIds != null) {
-            receivers.removeAll(alreadyNotifyUserIds);
-        }
-
-        LikeNotifyData likeNotifyData = new LikeNotifyData();
-        BeanUtils.copyProperties(like, likeNotifyData);
-        likeNotifyData.setCreateDt(like.getCreateDt().getTime());
-        this.imHelper.publishCommentNtf(receivers, likeNotifyData, MomentsCommentType.LIKE);
-
-        if (receivers != null && !receivers.isEmpty()) {
-
-            List<Message> messages = new ArrayList<>();
-            for (String receiverId: receivers) {
-                if (receiverId.equals(UserHolder.getUid())) {
-                    continue;
-                }
-                Message message = new Message();
-                message.setFeedId(feedId);
-                message.setMessageId(like.getLikeId());
-                message.setUserId(receiverId);
-                message.setPublishUserId(UserHolder.getUid());
-                message.setCreateDt(like.getCreateDt());
-                message.setMessageType(MomentsCommentType.LIKE.getType());
-                message.setStatus(MessageStatus.NORMAL.getValue());
-                messages.add(message);
-                redisOptService.zsAdd(RedisKey.getUserUnreadMessageKey(receiverId), message, like.getCreateDt().getTime());
+        if (like.getLikeStatus() == LikeStatus.DELETED.getValue()) {
+            List<String> alreadyNotifyUserIds = messageService.getLikeAlreadyNotifyUser(like.getLikeId(), UserHolder.getUid());
+            if (receivers != null && alreadyNotifyUserIds != null) {
+                receivers.removeAll(alreadyNotifyUserIds);
             }
-            messageService.saveMessage(messages);
         }
-
+        publishCommentTask.likeTask(like, receivers);
         return RestResult.success(respLikeIt);
     }
 
 
-    private void checkUserLikeFeed(String feedId) throws RestException {
+    private Like checkUserLikeFeed(String feedId) throws RestException {
         Like like = getLikeByUser(feedId);
-        if (Objects.nonNull(like)) {
+        if (Objects.nonNull(like) && like.getLikeStatus() == LikeStatus.NORMAL.getValue()) {
             throw new RestException(RestResult.generic(RestResultCode.ERR_LIKE_USER_ALEADY_LIKED));
         }
+        return like;
     }
 
     private Like getLikeByUser(String feedId) {
+        log.info("get like by user, feedId:{}, userId:{}", feedId, UserHolder.getUid());
         return this.likeMapper.selectByFeedIdAndUserId(feedId, UserHolder.getUid());
     }
 
@@ -119,7 +109,8 @@ public class LikeServiceImpl implements LikeService {
         if (Objects.isNull(like)) {
             throw new RestException(RestResult.generic(RestResultCode.ERR_LIKE_USER_NO_LIKE));
         }
-        this.likeMapper.deleteByPrimaryKey(like.getId());
+        like.setLikeStatus(LikeStatus.DELETED.getValue());
+        this.likeMapper.updateByPrimaryKeySelective(like);
     }
 
     @Override
@@ -156,8 +147,17 @@ public class LikeServiceImpl implements LikeService {
         savedLike.setFeedId(feedId);
         savedLike.setUserId(UserHolder.getUid());
         savedLike.setLikeId(IdentifierUtils.uuid24());
+        savedLike.setLikeStatus(LikeStatus.NORMAL.getValue());
         this.likeMapper.insertSelective(savedLike);
         return savedLike;
+    }
+
+    private Like updateLikeStatus(Integer status, Long likeId) {
+        Like like = new Like();
+        like.setId(likeId);
+        like.setLikeStatus(status);
+        this.likeMapper.updateByPrimaryKeySelective(like);
+        return like;
     }
 
 }
