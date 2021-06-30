@@ -152,6 +152,7 @@ public class SqlConfiguration {
         SqlSessionFactoryBean factoryBean = new SqlSessionFactoryBean();
         factoryBean.setDataSource(dataSource);
         factoryBean.setConfiguration(mybatisConfiguration);
+        factoryBean.setTypeHandlersPackage("cn.rongcloud.moment.server.common.typehanlder");
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
         try {
             factoryBean.setMapperLocations(resolver.getResources(mapperLocation));

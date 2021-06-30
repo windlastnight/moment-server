@@ -1,25 +1,16 @@
 package cn.rongcloud.moment.server.controller;
 
 import cn.rongcloud.moment.server.common.rest.RestResult;
-import cn.rongcloud.moment.server.common.utils.ApplicationUtil;
 import cn.rongcloud.moment.server.common.utils.GsonUtil;
 import cn.rongcloud.moment.server.common.utils.UserHolder;
 import cn.rongcloud.moment.server.pojos.Paged;
-import cn.rongcloud.moment.server.model.Comment;
 import cn.rongcloud.moment.server.pojos.ReqCreateComment;
 import cn.rongcloud.moment.server.service.CommentService;
-import com.google.common.collect.Lists;
-import com.sun.webkit.dom.CommentImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.DefaultTypedTuple;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.validation.Valid;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * @author renchaoyang
