@@ -107,9 +107,7 @@
       and  ID &gt; #{fromLikeId}
     </if>
     order by ID ASC
-    <if test="size != null">
-      limit #{size}
-    </if>
+    limit #{size}
   </select>
 
   <select id="selectByLikeId" parameterType="java.lang.String" resultMap="BaseResultMap">
