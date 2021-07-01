@@ -66,7 +66,11 @@ public class MessageServiceImpl implements MessageService {
 
         Set<Message> messages = (Set<Message>) optService.zsAll(RedisKey.getUserUnreadMessageKey(UserHolder.getUid()));
         optService.deleteKey(RedisKey.getUserUnreadMessageKey(UserHolder.getUid()));
-        List<RespMessageInfo> resp = buildRespMessage(new ArrayList<>(messages));
+        List<Message> messageList = new ArrayList<>(messages);
+        if (!messageList.isEmpty() && messageList.size() > 1000) {
+            messageList = messageList.subList(0, 1000);
+        }
+        List<RespMessageInfo> resp = buildRespMessage(messageList);
         Collections.reverse(resp);
         return RestResult.success(resp);
     }
@@ -85,9 +89,15 @@ public class MessageServiceImpl implements MessageService {
             optService.deleteKey(RedisKey.getUserUnreadMessageKey(UserHolder.getUid()));
         }
 
+        String userId = UserHolder.getUid();
+        long start = System.currentTimeMillis();
+        log.info("message chaxun: userId:{}, startDt:{}", userId, start);
         List<Message> messages = messageMapper.getMessageByPage(UserHolder.getUid(), fromMessageAutoIncId, size);
+        long end = System.currentTimeMillis();
+        log.info("message chaxun: userId:{}, endDt:{}, haoshi:{}", userId, end, (end-start));
         List<RespMessageInfo> resp = buildRespMessage(messages);
-
+        long end2 = System.currentTimeMillis();
+        log.info("message fanhuifengzhuang: userId:{}, endDt:{}, haoshi:{}", userId, end2, (end2-end));
         return RestResult.success(resp);
     }
 
