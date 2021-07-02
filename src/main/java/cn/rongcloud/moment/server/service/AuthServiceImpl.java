@@ -11,7 +11,7 @@ import cn.rongcloud.moment.server.common.rest.RestResultCode;
 import cn.rongcloud.moment.server.common.utils.UserHolder;
 import cn.rongcloud.moment.server.pojos.ReqAuth;
 import cn.rongcloud.moment.server.pojos.RespAuth;
-import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -48,7 +48,7 @@ public class AuthServiceImpl implements AuthService {
             UserHolder.setUser(jwtUser);
         } catch (IOException e) {
             throw new RestException(RestResult.generic(RestResultCode.ERR_LOGIN_AUTH_FAILED));
-        } catch (ExpiredJwtException e){
+        } catch (JwtException e){
             throw new RestException(RestResult.generic(RestResultCode.ERR_INVALID_AUTH));
         }
     }
