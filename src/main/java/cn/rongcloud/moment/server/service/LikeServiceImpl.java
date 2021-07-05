@@ -1,6 +1,5 @@
 package cn.rongcloud.moment.server.service;
 
-import cn.rongcloud.moment.server.common.im.IMHelper;
 import cn.rongcloud.moment.server.common.redis.RedisKey;
 import cn.rongcloud.moment.server.common.redis.RedisOptService;
 import cn.rongcloud.moment.server.common.rest.RestException;
@@ -10,17 +9,17 @@ import cn.rongcloud.moment.server.common.utils.DateTimeUtils;
 import cn.rongcloud.moment.server.common.utils.IdentifierUtils;
 import cn.rongcloud.moment.server.common.utils.UserHolder;
 import cn.rongcloud.moment.server.enums.LikeStatus;
-import cn.rongcloud.moment.server.enums.MessageStatus;
-import cn.rongcloud.moment.server.enums.MomentsCommentType;
 import cn.rongcloud.moment.server.mapper.LikeMapper;
-import cn.rongcloud.moment.server.model.*;
+import cn.rongcloud.moment.server.model.CacheExpireProperties;
+import cn.rongcloud.moment.server.model.Feed;
+import cn.rongcloud.moment.server.model.Like;
 import cn.rongcloud.moment.server.pojos.Paged;
 import cn.rongcloud.moment.server.pojos.ReqLikeIt;
 import cn.rongcloud.moment.server.pojos.RespLike;
 import cn.rongcloud.moment.server.pojos.RespLikeIt;
 import cn.rongcloud.moment.server.service.asyncTask.PublishCommentTask;
-import lombok.extern.slf4j.Slf4j;
 import com.google.common.collect.Lists;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.ZSetOperations;
@@ -35,6 +34,7 @@ import java.util.stream.Collectors;
  * @author renchaoyang
  * @date 2021/6/9
  */
+@Slf4j
 @Service
 public class LikeServiceImpl implements LikeService {
 
@@ -43,9 +43,6 @@ public class LikeServiceImpl implements LikeService {
 
     @Resource
     LikeMapper likeMapper;
-
-    @Resource
-    IMHelper imHelper;
 
     @Resource
     CommentService commentService;
@@ -62,6 +59,9 @@ public class LikeServiceImpl implements LikeService {
     @Resource(name = "redisTemplate")
     ZSetOperations zSetOperations;
 
+    @Resource
+    PublishCommentTask publishCommentTask;
+
     @Override
     public RestResult likeIt(ReqLikeIt reqLike) throws RestException {
         String feedId = reqLike.getFeedId();
@@ -72,6 +72,7 @@ public class LikeServiceImpl implements LikeService {
             like = this.saveLike(feedId);
         } else {
             updateLikeStatus(LikeStatus.NORMAL.getValue(), like.getId());
+            like.setLikeStatus(LikeStatus.NORMAL.getValue());
         }
         this.handleCommentCache(feedId);
         CacheService.cacheOne(RedisKey.getLikeSetKey(feedId), RedisKey.getLikeKey(feedId), like.getLikeId(),
