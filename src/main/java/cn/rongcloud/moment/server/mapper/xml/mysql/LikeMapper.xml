@@ -119,7 +119,9 @@
     </if>
     and LIKE_STATUS = 0
     order by ID ASC
-    limit #{size}
+    <if test="size != null">
+      limit #{size}
+    </if>
   </select>
 
   <select id="selectByLikeId" parameterType="java.lang.String" resultMap="BaseResultMap">

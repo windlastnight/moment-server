@@ -11,19 +11,20 @@ import cn.rongcloud.moment.server.common.utils.UserHolder;
 import cn.rongcloud.moment.server.enums.FeedStatus;
 import cn.rongcloud.moment.server.mapper.FeedMapper;
 import cn.rongcloud.moment.server.mapper.TimelineMapper;
-import cn.rongcloud.moment.server.model.Comment;
-import cn.rongcloud.moment.server.model.Feed;
-import cn.rongcloud.moment.server.model.Like;
-import cn.rongcloud.moment.server.model.Timeline;
+import cn.rongcloud.moment.server.model.*;
 import cn.rongcloud.moment.server.pojos.*;
 import cn.rongcloud.moment.server.common.rce.RceHelper;
 import cn.rongcloud.moment.server.common.rce.RceRespResult;
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
+import javax.annotation.Resource;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -56,6 +57,8 @@ public class FeedServiceImpl implements FeedService {
     @Value("${moment.system_manager_id}")
     private String systemManagerId;
 
+    @Resource
+    CacheExpireProperties expireProperties;
 
     @Override
     public RestResult publish(String userId, ReqFeedPublish data) {
@@ -75,6 +78,8 @@ public class FeedServiceImpl implements FeedService {
         //动态存储
         Feed feed = new Feed();
         saveFeed(userId, data, feed);
+        CacheService.cacheOne(RedisKey.getFeedSetKey(), RedisKey.getFeedKey(), feed.getFeedId(),
+                feed, CacheService.date2Score(feed.getUpdateDt()), expireProperties.getFeed());
 
         //将 feed 存储至队列,定时通知
         redisOptService.setAdd(RedisKey.getMomentPublishNotifyUsersKey(), data.getOrgIds());
@@ -104,13 +109,15 @@ public class FeedServiceImpl implements FeedService {
         //操作数据库删除
         feedMapper.deleteFeed(feedId);
         timelineMapper.deleteTimelineByFeedId(feedId);
+        CacheService.uncacheOne(RedisKey.getFeedSetKey(), RedisKey.getFeedKey(), feedId);
         return RestResult.success();
     }
 
     @Override
     public RestResult getFeedInfo(String feedId, boolean withComments, int commentSize, boolean withLikes, int likeSize) {
         //检查feed是否存在
-        Feed feed = feedMapper.getFeedById(feedId);
+//        Feed feed = feedMapper.getFeedById(feedId);
+        Feed feed = this.getFeedFromCacheOrDB(feedId);
         if (feed == null) {
             return RestResult.generic(RestResultCode.ERR_FEED_NOT_EXISTED);
         }
@@ -128,6 +135,8 @@ public class FeedServiceImpl implements FeedService {
         }
 
         List<Feed> feeds = feedMapper.getFeedsByIds(feedIds);
+//        List<Feed> feeds = feedIds.stream().map(this::getFeedFromCacheOrDB).collect(Collectors.toList());
+//        List<Feed> feeds = this.batchGetFeedFromCacheOrDB(feedIds);
         if (feeds != null && !feeds.isEmpty()) {
             for (Feed feed: feeds) {
                 RespFeedInfo resp = build(feed, withComments, commentSize, withLikes, likeSize);
@@ -178,11 +187,7 @@ public class FeedServiceImpl implements FeedService {
 
     @Override
     public Feed checkFeedExists(String feedId) throws RestException {
-        Feed feed = this.feedMapper.getFeedById(feedId);
-        if (Objects.isNull(feed) || Objects.equals(feed.getFeedStatus(), FeedStatus.DELETED.getValue())) {
-            throw new RestException(RestResult.generic(RestResultCode.ERR_FEED_NOT_EXISTED));
-        }
-        return feed;
+        return this.getFeedFromCacheOrDB(feedId);
     }
 
     private RespFeedInfo build(Feed feed, boolean withComments, int commentSize, boolean withLikes, int likeSize){
@@ -244,7 +249,7 @@ public class FeedServiceImpl implements FeedService {
         feedMapper.insertFeed(feed);
 
         List<Timeline> timelines = new ArrayList<>();
-        for (String orgId: data.getOrgIds()) {
+        for (String orgId : data.getOrgIds()) {
             Timeline timeline = new Timeline();
             timeline.setFeedId(feed.getFeedId());
             timeline.setOrgId(orgId);
@@ -252,6 +257,54 @@ public class FeedServiceImpl implements FeedService {
             timelines.add(timeline);
         }
         timelineMapper.batchInsertTimeline(timelines);
+    }
+
+    private Feed getFeedFromCacheOrDB(String feedId) {
+        String feedSetKey = RedisKey.getFeedSetKey();
+        String feedKey = RedisKey.getFeedKey();
+
+        Feed feed = (Feed) this.redisOptService.hashGet(feedKey, feedId);
+        if (feed == null) {
+            feed = feedMapper.getFeedById(feedId);
+            if (feed == null){
+                throw new RestException(RestResult.generic(RestResultCode.ERR_FEED_NOT_EXISTED));
+            }
+            if (needCache(feed.getUpdateDt())) {
+                CacheService.cacheOne(feedSetKey, feedKey, feedId, feed, Double.valueOf(String.valueOf(feed.getUpdateDt().getTime())), null);
+            }
+        }
+        return feed;
+    }
+
+    private List<Feed> batchGetFeedFromCacheOrDB(List<String> feedIds) {
+        String feedSetKey = RedisKey.getFeedSetKey();
+        String feedKey = RedisKey.getFeedKey();
+
+        List<Feed> feeds =  this.redisOptService.multiGet(feedKey, feedIds);
+
+        List<String> noCacheFeedIds;
+        if (CollectionUtils.isEmpty(feeds)) {
+            noCacheFeedIds = feedIds;
+        }else {
+            Set<String> cachedKeys = feeds.stream().collect(Collectors.groupingBy(Feed::getFeedId)).keySet();
+            noCacheFeedIds = feedIds.stream().filter(fid -> !cachedKeys.contains(fid)).collect(Collectors.toList());
+        }
+
+        if (!CollectionUtils.isEmpty(noCacheFeedIds)){
+            List<Feed> dbFeeds = this.feedMapper.getFeedsByIds(noCacheFeedIds);
+            dbFeeds.forEach(oneFeed->{
+                if (needCache(oneFeed.getUpdateDt())) {
+                    CacheService.cacheOne(feedSetKey, feedKey, oneFeed.getFeedId(), oneFeed, Double.valueOf(String.valueOf(oneFeed.getUpdateDt().getTime())), null);
+                }
+            });
+            feeds.addAll(dbFeeds);
+        }
+
+        return feeds;
+    }
+
+    public boolean needCache(Date date) {
+        return DateTimeUtils.currentDt().getTime() - date.getTime() < expireProperties.getIntervalS();
     }
 
 }

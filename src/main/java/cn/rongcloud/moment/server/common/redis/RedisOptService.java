@@ -6,10 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -67,6 +64,9 @@ public class RedisOptService {
     public Object get(String key) {
         return StringUtils.isBlank(key) ? null : valueOperations.get(key);
     }
+    public List multiGet(String key, Collection hks) {
+        return hashOperations.multiGet(key, hks);
+    }
 
     public String getStringValue(String key) {
         return StringUtils.isBlank(key) ? null : (String) valueOperations.get(key);
@@ -113,6 +113,10 @@ public class RedisOptService {
 
     public void hashSet(String key, String item, Object value) {
         hashOperations.put(key, item, value);
+    }
+
+    public <HK,HV> void hsetAll(String key, Map<HK, HV> kv) {
+        hashOperations.putAll(key, kv);
     }
 
     public void hashDelete(String key, Object... item) {
@@ -167,6 +171,10 @@ public class RedisOptService {
         return setOperations.remove(key, values);
     }
 
+    public long zsetRemove(String key, Object... values) {
+        return zSetOperations.remove(key, values);
+    }
+
     //===============================list=================================
 
     public List<Object> lGet(String key, long start, long end) {
@@ -218,6 +226,11 @@ public class RedisOptService {
     public void zsAdd(String key, Object value, double score) {
         zSetOperations.add(key, value, score);
     }
+
+    public Long add(String key, Set<DefaultTypedTuple> tuples){
+        return zSetOperations.add(key, tuples);
+    }
+
     public Long zsSize(String key) {
         return zSetOperations.size(key);
     }

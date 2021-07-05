@@ -85,6 +85,11 @@ moment:
   clear_msg:
     interval_days: 30
     cron: 0 0 2 * * ?
+  expire:
+    comment: 86400000
+    like: 86400000
+    intervalS: 86400000
+
 
 swagger2:
   enable: true

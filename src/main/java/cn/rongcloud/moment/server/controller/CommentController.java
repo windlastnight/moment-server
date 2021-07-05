@@ -44,5 +44,4 @@ public class CommentController {
         return this.commentService.getPagedComments(fid, page);
     }
 
-
 }
