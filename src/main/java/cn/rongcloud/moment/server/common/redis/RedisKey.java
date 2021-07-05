@@ -17,12 +17,12 @@ public class RedisKey {
         return CustomerConstant.SERVICE_NAME + "|user_unread_message|" + userId;
     }
 
-    public static final String COMMENT_SET_KEY = "feed:%s:commentids";
-    public static final String COMMENT_INFO_KEY = "feed:%s:comment:info";
-    public static final String LIKE_SET_KEY = "feed:%s:likeids";
-    public static final String LIKE_INFO_KEY = "feed:%s:like:info";
-    public static final String FEED_SET_KEY = "feed:ids";
-    public static final String FEED_INFO_KEY = "feed:info";
+    public static final String COMMENT_SET_KEY = CustomerConstant.SERVICE_NAME + "|feed:%s:commentids";
+    public static final String COMMENT_INFO_KEY = CustomerConstant.SERVICE_NAME + "|feed:%s:comment:info";
+    public static final String LIKE_SET_KEY = CustomerConstant.SERVICE_NAME + "|feed:%s:likeids";
+    public static final String LIKE_INFO_KEY = CustomerConstant.SERVICE_NAME + "|feed:%s:like:info";
+    public static final String FEED_SET_KEY = CustomerConstant.SERVICE_NAME + "|feed:ids";
+    public static final String FEED_INFO_KEY = CustomerConstant.SERVICE_NAME + "|feed:info";
 
     public static String getFeedSetKey() {
         return RedisKey.FEED_SET_KEY;
