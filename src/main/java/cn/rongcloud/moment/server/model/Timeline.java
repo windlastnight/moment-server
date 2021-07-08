@@ -9,5 +9,6 @@ public class Timeline {
     private Long id;
     private String feedId;
     private String orgId;
+    private Integer feedStatus;
     private Date createDt;
 }

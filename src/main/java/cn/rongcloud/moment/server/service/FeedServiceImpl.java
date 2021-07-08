@@ -6,6 +6,7 @@ import cn.rongcloud.moment.server.common.rest.RestException;
 import cn.rongcloud.moment.server.common.rest.RestResult;
 import cn.rongcloud.moment.server.common.rest.RestResultCode;
 import cn.rongcloud.moment.server.common.utils.DateTimeUtils;
+import cn.rongcloud.moment.server.common.utils.GsonUtil;
 import cn.rongcloud.moment.server.common.utils.IdentifierUtils;
 import cn.rongcloud.moment.server.common.utils.UserHolder;
 import cn.rongcloud.moment.server.enums.FeedStatus;
@@ -108,7 +109,7 @@ public class FeedServiceImpl implements FeedService {
         }
         //操作数据库删除
         feedMapper.deleteFeed(feedId);
-        timelineMapper.deleteTimelineByFeedId(feedId);
+        timelineMapper.updateTimelineFeedStatus(feedId, FeedStatus.DELETED.getValue());
         CacheService.uncacheOne(RedisKey.getFeedSetKey(), RedisKey.getFeedKey(), feedId);
         return RestResult.success();
     }
@@ -254,6 +255,7 @@ public class FeedServiceImpl implements FeedService {
             timeline.setFeedId(feed.getFeedId());
             timeline.setOrgId(orgId);
             timeline.setCreateDt(date);
+            timeline.setFeedStatus(FeedStatus.NORMAL.getValue());
             timelines.add(timeline);
         }
         timelineMapper.batchInsertTimeline(timelines);

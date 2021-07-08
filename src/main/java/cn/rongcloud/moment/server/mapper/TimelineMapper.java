@@ -13,9 +13,12 @@ public interface TimelineMapper {
     void deleteTimelineByFeedId(@Param("feedId") String feedId);
 
     Long getMinTimelineIdByFeedId(@Param("feedId") String feedId);
+
     Long getMaxTimelineIdByFeedId(@Param("feedId") String feedId);
 
     List<Timeline> getTimeline(@Param("orgIds") List<String> orgIds, @Param("fromTimelineAutoIncId") Long fromTimelineAutoIncId, @Param("size") Integer size);
 
     String getNewFeed(@Param("orgIds") List<String> orgIds, @Param("fromTimelineAutoIncId") Long fromTimelineAutoIncId);
+
+    int updateTimelineFeedStatus(@Param("feedId") String feedId, @Param("feedStatus") Integer feedStatus);
 }

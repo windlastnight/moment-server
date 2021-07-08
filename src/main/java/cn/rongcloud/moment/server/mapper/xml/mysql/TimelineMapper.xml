@@ -8,18 +8,19 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="id" column="ID"/>
         <result property="feedId" column="FEED_ID"/>
         <result property="orgId" column="ORG_ID"/>
+        <result property="feedStatus" column="FEED_STATUS"/>
         <result property="createDt" column="CREATE_DT"/>
     </resultMap>
 
     <sql id="selectTimelineVo">
-        SELECT ID, FEED_ID, ORG_ID, CREATE_DT FROM T_TIMELINE
+        SELECT ID, FEED_ID, ORG_ID, FEED_STATUS, CREATE_DT FROM T_TIMELINE
     </sql>
 
     <insert id="batchInsertTimeline">
-        INSERT INTO T_TIMELINE (FEED_ID, ORG_ID, CREATE_DT)
+        INSERT INTO T_TIMELINE (FEED_ID, ORG_ID, CREATE_DT, FEED_STATUS)
         VALUES
         <foreach collection ="timelines" item="timeline" separator =",">
-            (#{timeline.feedId}, #{timeline.orgId}, #{timeline.createDt})
+            (#{timeline.feedId}, #{timeline.orgId}, #{timeline.createDt}, #{timeline.feedStatus})
         </foreach >
     </insert>
 
@@ -27,14 +28,20 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         DELETE FROM T_TIMELINE WHERE FEED_ID = #{feedId}
     </delete>
 
+    <update id="updateTimelineFeedStatus">
+        UPDATE T_TIMELINE SET FEED_STATUS = #{feedStatus} WHERE FEED_ID = #{feedId}
+    </update>
+
     <select id="getMinTimelineIdByFeedId" resultType="java.lang.Long">
         SELECT ID FROM T_TIMELINE
-        WHERE FEED_ID = #{feedId} ORDER BY ID ASC limit 1
+        WHERE FEED_ID = #{feedId}
+        ORDER BY ID ASC limit 1
     </select>
 
     <select id="getMaxTimelineIdByFeedId" resultType="java.lang.Long">
         SELECT ID FROM T_TIMELINE
-        WHERE FEED_ID = #{feedId} ORDER BY ID DESC limit 1
+        WHERE FEED_ID = #{feedId}
+        ORDER BY ID DESC limit 1
     </select>
 
     <select id="getTimeline" resultMap="timelineResult">
@@ -44,6 +51,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{orgId}
         </foreach>
         <if test="fromTimelineAutoIncId != null"> AND ID &lt; #{fromTimelineAutoIncId} </if>
+        AND FEED_STATUS = 0
         ORDER BY ID DESC LIMIT #{size}
     </select>
 
@@ -54,6 +62,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{orgId}
         </foreach>
         <if test="fromTimelineAutoIncId != null"> AND ID &gt; #{fromTimelineAutoIncId} </if>
+        AND FEED_STATUS = 0
         LIMIT 1
     </select>
 
