@@ -72,6 +72,7 @@ moment:
   pass:
     anonymousUrls:
       - /**/*/user/auth
+      - /**/*/misc/version
       - /**/*/doc.html
       - /**/*/webjars/**
       - /**/*/swagger-resources/**
