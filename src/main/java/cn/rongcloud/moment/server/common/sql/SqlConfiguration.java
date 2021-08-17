@@ -25,6 +25,7 @@ import java.sql.DriverManager;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.Objects;
 
 @Configuration
 @EnableTransactionManagement(proxyTargetClass = true)
@@ -87,7 +88,12 @@ public class SqlConfiguration {
             //一个连接在池中最小生存的时间，单位是毫秒
             dataSource.setMinEvictableIdleTimeMillis(dsMinEvictableIdleTimeMillis);
 
-            dataSource.setValidationQuery("SELECT 'x'");
+
+            if (Objects.equals(dbName, "gbase_oracle")){
+                dataSource.setValidationQuery("SELECT current from dual");
+            }else {
+                dataSource.setValidationQuery("SELECT 'x'");
+            }
             dataSource.setTestWhileIdle(true);
             dataSource.setTestOnBorrow(false);
             dataSource.setTestOnReturn(false);

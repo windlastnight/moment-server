@@ -121,6 +121,14 @@
             <version>8.8.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.gbasedbt</groupId>
+            <artifactId>gbasedbt</artifactId>
+            <version>3.0.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/libs/gbasedbtjdbc_3.0.0_2_bf98cd.jar</systemPath>
+        </dependency>
+
     </dependencies>
 
     <build>
