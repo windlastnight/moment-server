@@ -5,11 +5,12 @@ import cn.rongcloud.moment.server.common.redis.RedisKey;
 import cn.rongcloud.moment.server.common.redis.RedisOptService;
 import cn.rongcloud.moment.server.common.rest.RestResult;
 import cn.rongcloud.moment.server.common.rest.RestResultCode;
+import cn.rongcloud.moment.server.common.utils.GsonUtil;
 import cn.rongcloud.moment.server.common.utils.UserHolder;
 import cn.rongcloud.moment.server.enums.MessageStatus;
 import cn.rongcloud.moment.server.enums.MomentsCommentType;
-import cn.rongcloud.moment.server.mapper.MessageMapper;
 import cn.rongcloud.moment.server.model.Comment;
+import cn.rongcloud.moment.server.model.Like;
 import cn.rongcloud.moment.server.model.Message;
 import cn.rongcloud.moment.server.pojos.RespMessageInfo;
 import cn.rongcloud.moment.server.pojos.RespMessageUnreadCount;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /**
@@ -30,7 +32,7 @@ import java.util.stream.Collectors;
 public class MessageServiceImpl implements MessageService {
 
     @Autowired
-    private MessageMapper messageMapper;
+    private ElasticSearchService elasticSearchService;
 
     @Autowired
     private RedisOptService optService;
@@ -43,7 +45,7 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public void saveMessage(List<Message> messages) {
-        messageMapper.batchInsertMessage(messages);
+        elasticSearchService.batchSaveMessage(messages);
     }
 
     @Override
@@ -78,26 +80,20 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public RestResult getHistory(String fromMessageId, Integer size) {
 
-        Long fromMessageAutoIncId = null;
+        Message message = null;
         if (!StringUtils.isEmpty(fromMessageId)) {
-            Message message = messageMapper.getMessage(fromMessageId, UserHolder.getUid());
+            message = elasticSearchService.getMessage(fromMessageId, UserHolder.getUid());
             if (message == null) {
                 return RestResult.generic(RestResultCode.ERR_MESSAGE_NOT_EXISTED);
             }
-            fromMessageAutoIncId = message.getId();
         } else {
             optService.deleteKey(RedisKey.getUserUnreadMessageKey(UserHolder.getUid()));
         }
 
-        String userId = UserHolder.getUid();
-        long start = System.currentTimeMillis();
-        log.info("message chaxun: userId:{}, startDt:{}", userId, start);
-        List<Message> messages = messageMapper.getMessageByPage(UserHolder.getUid(), fromMessageAutoIncId, size);
-        long end = System.currentTimeMillis();
-        log.info("message chaxun: userId:{}, endDt:{}, haoshi:{}", userId, end, (end-start));
+        List<Message> messages = elasticSearchService.getMessageByPage(UserHolder.getUid(), size, message);
+
         List<RespMessageInfo> resp = buildRespMessage(messages);
-        long end2 = System.currentTimeMillis();
-        log.info("message fanhuifengzhuang: userId:{}, endDt:{}, haoshi:{}", userId, end2, (end2-end));
+
         return RestResult.success(resp);
     }
 
@@ -106,24 +102,33 @@ public class MessageServiceImpl implements MessageService {
         if (ids == null || ids.isEmpty()) {
             return RestResult.success();
         }
-        messageMapper.batchDelete(UserHolder.getUid(), ids);
+        Map<String, Date> map = new HashMap<>();
+        List<Like> likes = likeService.batchGetLikes(ids);
+        log.info("likes:{}", GsonUtil.toJson(likes));
+        if (likes != null) {
+           map.putAll(likes.stream().collect(Collectors.toMap(Like::getLikeId, Like::getCreateDt)));
+        }
+        if (likes != null && likes.size() != ids.size()) {
+            List<Comment> comments = commentService.batchGetComment(ids);
+            log.info("comments:{}", GsonUtil.toJson(comments));
+            if (comments != null) {
+                map.putAll(comments.stream().collect(Collectors.toMap(Comment::getCommentId, Comment::getCreateDt)));
+            }
+        }
+        log.info("test:{}", GsonUtil.toJson(map));
+        elasticSearchService.deleteByMessageIds(map);
         return RestResult.success();
     }
 
     @Override
     public RestResult deleteAll() {
-        messageMapper.deleteAll(UserHolder.getUid());
+        elasticSearchService.deleteByUserId(UserHolder.getUid());
         return RestResult.success();
     }
 
     @Override
-    public void updateStatus(String messageId, Integer status) {
-        messageMapper.updateStatus(status, messageId);
-    }
-
-    @Override
     public List<String> getLikeAlreadyNotifyUser(String messageId, String userId) {
-        return messageMapper.getLikeAlreadyNotifyUser(messageId, userId);
+        return elasticSearchService.getLikeAlreadyNotifyUser(messageId, userId);
     }
 
     private List<RespMessageInfo> buildRespMessage(List<Message> messages) {

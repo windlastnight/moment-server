@@ -1,8 +1,6 @@
 package cn.rongcloud.moment.server.mapper;
 
-
 import cn.rongcloud.moment.server.model.Like;
-import cn.rongcloud.moment.server.pojos.Paged;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -27,4 +25,6 @@ public interface LikeMapper {
     List<Like> selectPagedLike(@Param("feedId") String feedId, @Param("fromLikeId") Long page, @Param("size") Integer size);
 
     Like selectByLikeId(String likeId);
+
+    List<Like> batchGetLikes(@Param("likeIds") List<String> likeIds);
 }

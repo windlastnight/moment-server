@@ -3,7 +3,6 @@ package cn.rongcloud.moment.server.service.asyncTask;
 import cn.rongcloud.moment.server.common.im.IMHelper;
 import cn.rongcloud.moment.server.common.redis.RedisKey;
 import cn.rongcloud.moment.server.common.redis.RedisOptService;
-import cn.rongcloud.moment.server.common.utils.UserHolder;
 import cn.rongcloud.moment.server.enums.MessageStatus;
 import cn.rongcloud.moment.server.enums.MomentsCommentType;
 import cn.rongcloud.moment.server.model.*;

@@ -23,10 +23,10 @@ public class ClearMsgJob implements InitializingBean {
     @Resource
     private MessageMapper msgMapper;
 
-    @Value("${moment.clear_msg.interval_days}")
-    private Long intervalDays;
+    @Value("${moment.message.save_time}")
+    private Long messageSaveTime;
 
-    @Scheduled(cron = "${moment.clear_msg.cron}")
+    @Scheduled(cron = "0 0 2 * * ?")
     public void fillOrgInfoUserStatistic() {
         log.info("ClearMsgJob execute time:{}", LocalDateTime.now());
         handleJob();
@@ -34,7 +34,7 @@ public class ClearMsgJob implements InitializingBean {
 
     private void handleJob() {
         LocalDate localDate = LocalDate.now();
-        LocalDate delLocalDate = localDate.minusDays(intervalDays);
+        LocalDate delLocalDate = localDate.minusDays(messageSaveTime);
         log.info("del msg before day:{}", delLocalDate);
         Date delDate = Date.from(delLocalDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
         this.msgMapper.delMsgBeforeDate(delDate);

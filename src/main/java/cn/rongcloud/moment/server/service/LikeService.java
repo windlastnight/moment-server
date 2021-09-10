@@ -21,4 +21,6 @@ public interface LikeService {
     RestResult getPagedLikes(String fid, Paged page) throws RestException;
 
     List<Like> getLikes(String feedId, String fromLikeId, int size);
+
+    List<Like> batchGetLikes(List<String> likeIds);
 }

@@ -17,6 +17,5 @@ public interface MessageService {
 
     RestResult batchDelete(List<String> ids);
     RestResult deleteAll();
-    void updateStatus(String messageId, Integer status);
     List<String> getLikeAlreadyNotifyUser(String messageId, String userId);
 }

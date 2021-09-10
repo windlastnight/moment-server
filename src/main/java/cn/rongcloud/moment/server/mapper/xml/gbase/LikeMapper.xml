@@ -128,4 +128,13 @@
     from T_LIKE
     where LIKE_ID = #{id}
   </select>
+
+  <select id="batchGetLikes" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from T_LIKE where LIKE_ID in
+    <foreach item="likeId" collection="likeIds" open="(" separator="," close=")">
+      #{likeId}
+    </foreach>
+  </select>
 </mapper>

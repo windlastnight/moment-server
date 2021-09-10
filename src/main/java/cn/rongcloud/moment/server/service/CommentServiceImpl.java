@@ -79,7 +79,7 @@ public class CommentServiceImpl implements CommentService {
         BeanUtils.copyProperties(reqComment, comment);
         comment.setCreateDt(DateTimeUtils.currentDt());
         comment.setUserId(UserHolder.getUid());
-        comment.setCommentId(IdentifierUtils.uuid24());
+        comment.setCommentId(IdentifierUtils.uuid32());
         this.commentMapper.insertSelective(comment);
 
         handleCommentCache(feedId);
@@ -134,7 +134,6 @@ public class CommentServiceImpl implements CommentService {
             throw new RestException(RestResult.generic(RestResultCode.ERR_FEED_NOT_EXISTED));
         }
         this.commentMapper.deleteByPrimaryKey(comment.getId());
-        messageService.updateStatus(commentId, MessageStatus.DELETED.getValue());
         CacheService.uncacheOne(RedisKey.getCommentSetKey(feedId), RedisKey.getCommentKey(feedId), commentId);
     }
 

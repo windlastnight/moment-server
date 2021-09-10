@@ -11,6 +11,7 @@ import cn.rongcloud.moment.server.common.utils.UserHolder;
 import cn.rongcloud.moment.server.enums.LikeStatus;
 import cn.rongcloud.moment.server.mapper.LikeMapper;
 import cn.rongcloud.moment.server.model.CacheExpireProperties;
+import cn.rongcloud.moment.server.model.Comment;
 import cn.rongcloud.moment.server.model.Feed;
 import cn.rongcloud.moment.server.model.Like;
 import cn.rongcloud.moment.server.pojos.Paged;
@@ -156,12 +157,26 @@ public class LikeServiceImpl implements LikeService {
         return likes;
     }
 
+    @Override
+    public List<Like> batchGetLikes(List<String> likeIds) {
+        List<Like> likes;
+        if (likeIds == null || likeIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        likes = likeMapper.batchGetLikes(likeIds);
+        if (likes == null) {
+            return new ArrayList<>();
+        }
+        return likes;
+    }
+
     private Like saveLike(String feedId) {
         Like savedLike = new Like();
         savedLike.setCreateDt(DateTimeUtils.currentDt());
         savedLike.setFeedId(feedId);
         savedLike.setUserId(UserHolder.getUid());
-        savedLike.setLikeId(IdentifierUtils.uuid24());
+        savedLike.setLikeId(IdentifierUtils.uuid32());
         savedLike.setLikeStatus(LikeStatus.NORMAL.getValue());
         this.likeMapper.insertSelective(savedLike);
         return savedLike;
