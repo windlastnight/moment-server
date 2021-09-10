@@ -129,6 +129,58 @@
             <systemPath>${project.basedir}/libs/gbasedbtjdbc_3.0.0_2_bf98cd.jar</systemPath>
         </dependency>
 
+        <dependency>
+            <groupId>org.elasticsearch</groupId>
+            <artifactId>elasticsearch</artifactId>
+            <version>5.6.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>transport</artifactId>
+            <version>5.6.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.elasticsearch.plugin</groupId>
+                    <artifactId>transport-netty4-client</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.elasticsearch</groupId>
+                    <artifactId>elasticsearch</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.elasticsearch.client</groupId>
+                    <artifactId>elasticsearch-rest-client</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.elasticsearch.plugin</groupId>
+            <artifactId>transport-netty4-client</artifactId>
+            <version>5.6.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>elasticsearch-rest-client</artifactId>
+            <version>5.6.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.floragunn</groupId>
+            <artifactId>search-guard-ssl</artifactId>
+            <version>5.6.5-23</version>
+        </dependency>
+        <dependency>
+            <groupId>com.floragunn</groupId>
+            <artifactId>search-guard-5</artifactId>
+            <version>5.6.5-19.1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.floragunn</groupId>
+                    <artifactId>search-guard-ssl</artifactId>
+                </exclusion>
+            </exclusions>
+            <scope>provided</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
