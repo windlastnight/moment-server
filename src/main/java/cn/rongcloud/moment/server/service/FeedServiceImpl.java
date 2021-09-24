@@ -179,7 +179,13 @@ public class FeedServiceImpl implements FeedService {
             return RestResult.success(resp);
         }
 
-        String feedId = timelineMapper.getNewFeed(orgIds, fromTimelineId);
+        String currentUserLastTimelineUid = null;
+        List<String> timelines = feedMapper.getFeedIdsByUserId(UserHolder.getUid(), null, 1);
+        if (timelines != null && timelines.size() == 1) {
+            currentUserLastTimelineUid = timelines.get(0);
+        }
+
+        String feedId = timelineMapper.getNewFeed(orgIds, fromTimelineId, currentUserLastTimelineUid);
         if (feedId != null) {
             resp.setHasNew(true);
         }

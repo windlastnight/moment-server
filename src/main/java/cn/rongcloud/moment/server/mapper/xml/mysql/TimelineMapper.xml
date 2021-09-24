@@ -63,6 +63,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </foreach>
         <if test="fromTimelineAutoIncId != null"> AND ID &gt; #{fromTimelineAutoIncId} </if>
         AND FEED_STATUS = 0
+        <if test="fromTimelineAutoIncId != null"> AND FEED_ID != #{currentUserLastTimelineUid} </if>
         LIMIT 1
     </select>
 
