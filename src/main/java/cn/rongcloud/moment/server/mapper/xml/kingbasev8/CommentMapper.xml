@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.rongcloud.moment.server.mapper.CommentMapper">
+  <resultMap id="BaseResultMap" type="cn.rongcloud.moment.server.model.Comment">
+    <id column="ID" jdbcType="BIGINT" property="id" />
+    <result column="COMMENT_ID" jdbcType="VARCHAR" property="commentId" />
+    <result column="FEED_ID" jdbcType="VARCHAR" property="feedId" />
+    <result column="USER_ID" jdbcType="VARCHAR" property="userId" />
+    <result column="COMMENT_CONTENT" jdbcType="VARCHAR" property="commentContent" />
+    <result column="REPLY_TO" jdbcType="VARCHAR" property="replyTo" />
+    <result column="CREATE_DT" jdbcType="TIMESTAMP" property="createDt" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    ID, COMMENT_ID, FEED_ID, USER_ID, COMMENT_CONTENT, REPLY_TO, CREATE_DT
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from T_COMMENT
+    where ID = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from T_COMMENT
+    where ID = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="cn.rongcloud.moment.server.model.Comment">
+    insert into T_COMMENT (ID, COMMENT_ID, FEED_ID, 
+      USER_ID, COMMENT_CONTENT, REPLY_TO, 
+      CREATE_DT)
+    values (#{id,jdbcType=BIGINT}, #{commentId,jdbcType=VARCHAR}, #{feedId,jdbcType=VARCHAR}, 
+      #{userId,jdbcType=VARCHAR}, #{commentContent,jdbcType=VARCHAR}, #{replyTo,jdbcType=VARCHAR}, 
+      #{createDt,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="cn.rongcloud.moment.server.model.Comment">
+    insert into T_COMMENT
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        ID,
+      </if>
+      <if test="commentId != null">
+        COMMENT_ID,
+      </if>
+      <if test="feedId != null">
+        FEED_ID,
+      </if>
+      <if test="userId != null">
+        USER_ID,
+      </if>
+      <if test="commentContent != null">
+        COMMENT_CONTENT,
+      </if>
+      <if test="replyTo != null">
+        REPLY_TO,
+      </if>
+      <if test="createDt != null">
+        CREATE_DT,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="commentId != null">
+        #{commentId,jdbcType=VARCHAR},
+      </if>
+      <if test="feedId != null">
+        #{feedId,jdbcType=VARCHAR},
+      </if>
+      <if test="userId != null">
+        #{userId,jdbcType=VARCHAR},
+      </if>
+      <if test="commentContent != null">
+        #{commentContent,jdbcType=VARCHAR},
+      </if>
+      <if test="replyTo != null">
+        #{replyTo,jdbcType=VARCHAR},
+      </if>
+      <if test="createDt != null">
+        #{createDt,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.rongcloud.moment.server.model.Comment">
+    update T_COMMENT
+    <set>
+      <if test="commentId != null">
+        COMMENT_ID = #{commentId,jdbcType=VARCHAR},
+      </if>
+      <if test="feedId != null">
+        FEED_ID = #{feedId,jdbcType=VARCHAR},
+      </if>
+      <if test="userId != null">
+        USER_ID = #{userId,jdbcType=VARCHAR},
+      </if>
+      <if test="commentContent != null">
+        COMMENT_CONTENT = #{commentContent,jdbcType=VARCHAR},
+      </if>
+      <if test="replyTo != null">
+        REPLY_TO = #{replyTo,jdbcType=VARCHAR},
+      </if>
+      <if test="createDt != null">
+        CREATE_DT = #{createDt,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.rongcloud.moment.server.model.Comment">
+    update T_COMMENT
+    set COMMENT_ID = #{commentId,jdbcType=VARCHAR},
+      FEED_ID = #{feedId,jdbcType=VARCHAR},
+      USER_ID = #{userId,jdbcType=VARCHAR},
+      COMMENT_CONTENT = #{commentContent,jdbcType=VARCHAR},
+      REPLY_TO = #{replyTo,jdbcType=VARCHAR},
+      CREATE_DT = #{createDt,jdbcType=TIMESTAMP}
+    where ID = #{id,jdbcType=BIGINT}
+  </update>
+
+  <select id="selectLastUserCommet" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List"/>
+    from T_COMMENT where FEED_ID = #{feedId,jdbcType=VARCHAR}
+    and USER_ID = #{userId,jdbcType=VARCHAR} limit 1;
+  </select>
+
+  <select id="selectPagedComment" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List"/>
+    from T_COMMENT where
+    FEED_ID = #{feedId}
+    <if test="fromAutoIncCommentId != null and fromAutoIncCommentId != ''">
+      and  ID &gt; #{fromAutoIncCommentId}
+    </if>
+    order by ID ASC
+    <if test="size != null">
+      limit #{size}
+    </if>
+  </select>
+
+  <select id="getAllCommentAndLikeUserIds" resultType="java.lang.String">
+    select distinct USER_ID
+    from (
+                 select USER_ID
+                 from T_COMMENT where feed_id=#{value}
+                 union all
+                 select USER_ID
+                 from T_LIKE where feed_id=#{value}
+                 ) as tmp
+  </select>
+  <select id="selectByCommentId" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from T_COMMENT
+    where COMMENT_ID = #{id}
+  </select>
+
+  <select id="batchGetComment" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from T_COMMENT where COMMENT_ID in
+    <foreach item="commentId" collection="commentIds" open="(" separator="," close=")">
+      #{commentId}
+    </foreach>
+  </select>
+</mapper>
