@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.rongcloud.moment.server.mapper.MessageMapper">
+
+    <resultMap type="cn.rongcloud.moment.server.model.Message" id="messageResult">
+        <result property="id" column="ID"/>
+        <result property="messageId" column="MESSAGE_ID"/>
+        <result property="feedId" column="FEED_ID"/>
+        <result property="userId" column="USER_ID"/>
+        <result property="messageType" column="MESSAGE_TYPE"/>
+        <result property="createDt" column="CREATE_DT"/>
+        <result property="publishUserId" column="PUBLISH_USER_ID"/>
+        <result property="status" column="STATUS"/>
+    </resultMap>
+
+    <sql id="selectTMessageVo">
+        SELECT ID, MESSAGE_ID, FEED_ID, USER_ID, MESSAGE_TYPE, CREATE_DT, STATUS, PUBLISH_USER_ID FROM T_MESSAGE
+    </sql>
+
+    <insert id="insertMessage" parameterType="cn.rongcloud.moment.server.model.Message" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO T_MESSAGE
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            MESSAGE_ID,
+            FEED_ID,
+            USER_ID,
+            MESSAGE_TYPE,
+            CREATE_DT,
+            STATUS,
+            PUBLISH_USER_ID,
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            #{messageId},
+            #{feedId},
+            #{userId},
+            #{messageType},
+            #{createDt},
+            #{status},
+            #{publishUserId}
+        </trim>
+    </insert>
+
+    <insert id="batchInsertMessage">
+        <foreach collection ="messages" item="message">
+            INSERT INTO T_MESSAGE (MESSAGE_ID, FEED_ID, USER_ID, MESSAGE_TYPE, CREATE_DT, STATUS, PUBLISH_USER_ID) VALUES
+            (#{message.messageId}, #{message.feedId}, #{message.userId}, #{message.messageType}, #{message.createDt}, #{message.status}, #{message.publishUserId})；
+        </foreach >
+    </insert>
+
+
+
+    <select id="getMessage" resultMap="messageResult">
+        <include refid="selectTMessageVo"/>
+        WHERE MESSAGE_ID = #{messageId} AND USER_ID = #{userId}
+    </select>
+
+    <select id="getMessageByPage" resultMap="messageResult">
+        SELECT ID, MESSAGE_ID, FEED_ID, USER_ID, MESSAGE_TYPE, CREATE_DT, STATUS, PUBLISH_USER_ID FROM T_MESSAGE
+        WHERE USER_ID = #{userId}
+        <if test="fromMessageAutoIncId != null"> AND ID &lt; #{fromMessageAutoIncId} </if>
+        ORDER BY ID DESC limit #{size}
+    </select>
+
+    <delete id="batchDelete">
+        DELETE FROM T_MESSAGE WHERE USER_ID = #{userId}
+        AND MESSAGE_ID IN
+        <foreach item="messageId" collection="messageIds" open="(" separator="," close=")">
+            #{messageId}
+        </foreach>
+    </delete>
+
+    <delete id="deleteAll">
+        DELETE FROM T_MESSAGE WHERE USER_ID = #{userId}
+    </delete>
+
+    <update id="updateStatus">
+        UPDATE T_MESSAGE SET STATUS = #{status} WHERE MESSAGE_ID = #{messageId}
+    </update>
+
+    <select id="getLikeAlreadyNotifyUser" resultType="java.lang.String">
+        SELECT USER_ID FROM T_MESSAGE WHERE MESSAGE_ID = #{messageId} AND PUBLISH_USER_ID = #{userId}
+    </select>
+
+    <delete id="delMsgBeforeDate">
+        DELETE FROM T_MESSAGE WHERE CREATE_DT &lt; #{value}
+    </delete>
+
+</mapper>
